@@ -15,6 +15,7 @@
 #include "proc.h"
 #include "x86.h"
 
+
 static void consputc(int);
 
 static int panicked = 0;
@@ -186,13 +187,47 @@ struct {
   uint e;  // Edit index
 } input;
 
+char clipboard[INPUT_BUF];
+
 #define C(x)  ((x)-'@')  // Control-x
+
+void copy_line(){
+  ;
+  for (int i =0; i < INPUT_BUF; i++)
+    clipboard[i] = C('@');
+  int counter = 0;
+  int clipcnt = 0;
+  char* a = input.buf;
+  for(; *a; a++){
+    if (counter >= input.w){
+      clipboard[clipcnt++] = *a;
+    }
+    counter++;
+  }
+}
+
+void kill_line(){
+  while(input.e != input.w &&
+        input.buf[(input.e-1) % INPUT_BUF] != '\n'){
+    input.e--;
+    input.buf[input.e % INPUT_BUF] = C('@');
+    consputc(BACKSPACE);
+  }
+}
+
+void paste_line(){
+  ;
+  char* clp = clipboard;
+  for(; *clp; clp++){
+    consputc(*clp);
+    input.buf[input.e++ % INPUT_BUF] = *clp;
+  }
+}
 
 void
 consoleintr(int (*getc)(void))
 {
   int c, doprocdump = 0;
-
   acquire(&cons.lock);
   while((c = getc()) >= 0){
     switch(c){
@@ -204,14 +239,31 @@ consoleintr(int (*getc)(void))
       while(input.e != input.w &&
             input.buf[(input.e-1) % INPUT_BUF] != '\n'){
         input.e--;
+        input.buf[input.e % INPUT_BUF] = C('@');
         consputc(BACKSPACE);
       }
       break;
     case C('H'): case '\x7f':  // Backspace
       if(input.e != input.w){
         input.e--;
+        input.buf[input.e % INPUT_BUF] = C('@');
         consputc(BACKSPACE);
       }
+      break;
+    // This is code for ctrl + c
+    case C('C'):
+      copy_line();
+      break;
+    case C('V'):
+      paste_line();
+      break;
+    case C('B'):
+      kill_line();
+      paste_line();
+      break;
+    case C('X'):
+      copy_line();
+      kill_line();
       break;
     default:
       if(c != 0 && input.e-input.r < INPUT_BUF){
