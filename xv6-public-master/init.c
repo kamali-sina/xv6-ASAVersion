@@ -21,9 +21,9 @@ main(void)
 
   for(;;){
     printf(1, "init: starting sh\n");
-    printf(1, "Amir Mahdi Mohamadian\n");
-    printf(1, "Sina Kamali\n");
-    printf(1, "Alireza Ebrahimi\n");
+    printf(1, "1- Amir Mahdi Mohamadian\n");
+    printf(1, "2- Sina Kamali\n");
+    printf(1, "3- Alireza Ebrahimi\n");
     pid = fork();
     if(pid < 0){
       printf(1, "init: fork failed\n");
