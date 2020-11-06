@@ -121,6 +121,11 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 
+//costume system calls
+int             reverse_number(int);
+int             trace_syscalls(int);
+int             get_children(int);
+
 // swtch.S
 void            swtch(struct context**, struct context*);
 

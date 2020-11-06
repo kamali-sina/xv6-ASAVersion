@@ -532,3 +532,17 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+//costume syscalls
+
+int reverse_number(int number){
+  //code here
+}
+
+int trace_syscalls(int state){
+  //code here
+}
+
+int get_children(int pid){
+  //code here
+}

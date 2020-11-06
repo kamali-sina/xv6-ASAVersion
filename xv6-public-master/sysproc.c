@@ -89,3 +89,23 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+//costume syscalls
+
+int 
+sys_reverse_number(void)
+{
+  //code here
+}
+
+int 
+sys_trace_syscalls(int)
+{
+  //code here
+}
+
+int 
+sys_get_children(int)
+{
+  //code here
+}
