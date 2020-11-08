@@ -23,3 +23,4 @@
 #define SYS_reverse_number 22
 #define SYS_trace_syscalls 23
 #define SYS_get_children 24
+#define SYS_setup_trace 25

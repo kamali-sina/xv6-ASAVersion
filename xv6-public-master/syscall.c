@@ -106,6 +106,7 @@ extern int sys_uptime(void);
 extern int sys_reverse_number(void);
 extern int sys_trace_syscalls(void);
 extern int sys_get_children(void);
+extern int sys_setup_trace(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -132,15 +133,49 @@ static int (*syscalls[])(void) = {
 [SYS_reverse_number] sys_reverse_number,
 [SYS_trace_syscalls] sys_trace_syscalls,
 [SYS_get_children] sys_get_children,
+[SYS_setup_trace] sys_setup_trace,
+
 };
+
+int write_to_trace(int i, struct proc *proc){
+  for (int j = 0 ; j < strlen(proc->name) ; j++){
+    tracer[i].name[j] = proc->name[j];
+  }
+  tracer[i].name[strlen(proc->name)] = '\0';
+  return 0;
+}
+
+int add_syscall(struct proc *proc, int num){
+  // cprintf("syscall %d called by %s\n", num, proc->name);
+  if (trace_state == 1){
+    for (int i = 0; i < 100 ; i++){
+      if (tracer[i].valid == 1){
+        if (namecmp(tracer[i].name, proc->name) == 0) {
+          //update
+          tracer[i].valid = 1;
+          tracer[i].syscalls[num] += 1;
+          break;
+        }
+      }else{
+        //add new
+        write_to_trace(i, proc);
+        tracer[i].valid = 1;
+        tracer[i].syscalls[num] += 1;
+        break;
+      }
+    }
+  }
+  return 0;
+}
+
 
 void
 syscall(void)
 {
   int num;
   struct proc *curproc = myproc();
-
   num = curproc->tf->eax;
+  add_syscall(curproc, num);
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     curproc->tf->eax = syscalls[num]();
   } else {

@@ -125,6 +125,7 @@ void            yield(void);
 int             reverse_number(int);
 int             trace_syscalls(int);
 int             get_children(int);
+int             setup_trace(int);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

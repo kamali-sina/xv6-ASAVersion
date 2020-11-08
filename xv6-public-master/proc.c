@@ -7,6 +7,48 @@
 #include "proc.h"
 #include "spinlock.h"
 
+int trace_state  = 0;
+int do_once = 1;
+proc_trace tracer[100];
+static char* list[] = {
+    "fork",
+    "exit",
+    "wait",
+    "pipe",
+    "read",
+    "kill",
+    "exec",
+    "fstat",
+    "chdir",
+    "dup",
+    "getpid",
+    "sbrk",
+    "sleep",
+    "uptime",
+    "open",
+    "write",
+    "mknod",
+    "unlink",
+    "link",
+    "mkdir",
+    "close",
+    "reverse_number",
+    "trace_syscalls",
+    "get_children",
+    "setup_trace",
+    0
+};
+
+int reset_trace(){
+  for (int i = 0; i < 100; i++){
+    tracer[i].valid = 0;
+    for (int j = 0 ; j < 27 ; j++){
+      tracer[i].syscalls[j] = 0;
+    }
+  }
+  return 0;
+}
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -120,6 +162,7 @@ found:
 void
 userinit(void)
 {
+  reset_trace();
   struct proc *p;
   extern char _binary_initcode_start[], _binary_initcode_size[];
 
@@ -535,14 +578,90 @@ procdump(void)
 
 //costume syscalls
 
-int reverse_number(int number){
-  //code here
+int reverse_number(int num){
+  int result = 0;
+  while(num > 0) {
+    result *= 10;
+    result += num % 10;
+    num /= 10;
+  }
+  return result;
 }
 
+
 int trace_syscalls(int state){
-  //code here
+  argint(0,&state);
+  trace_state = state;
+  if (state == 0)
+    reset_trace();
+  cprintf("state is now %d\n", trace_state);
+  return 0;
 }
 
 int get_children(int pid){
-  //code here
+  struct proc *p;
+  int found = 0;
+  int childern_pids = 0;
+  int mult = 10;
+  argint(0, &pid);
+  cprintf("PID: %d\n", pid);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->parent->pid == pid){
+      if (mult <= pid)
+        continue;
+      childern_pids *= mult;
+      childern_pids += p->pid;
+      found = 1;
+    }
+  }
+  if(found == 1)
+    return childern_pids;
+  return -1;
+}
+
+void print_trace(){
+  cprintf("\n");
+  for (int i = 0 ; i < 100 ; i ++){
+    if (tracer[i].valid == 1){
+      cprintf("%s\n",tracer[i].name);
+      for (int j = 0 ; j < 27 ; j++){
+        if (tracer[i].syscalls[j] > 0)
+          cprintf("          %s: %d\n",list[j-1] , tracer[i].syscalls[j]);
+      }
+      cprintf("\n");
+    }
+    else break;
+  }
+  cprintf("$ ");
+}
+
+int trace_handler(){
+  int lasttick = ticks/100;
+  int time_passed = 5;
+  int checker = 1;
+  while (1){
+    if (checker > 0){
+      cprintf("starting\n");
+      checker--;
+    }
+    if (trace_state != 0){
+      if (lasttick != ticks/100){
+        time_passed++;
+        lasttick = ticks/100;
+      }
+      if (trace_state == 1 && time_passed > 6){
+        time_passed = 0;
+        if (trace_state == 1){
+          cprintf("printing all:\n");
+          print_trace();
+        }
+      }
+    }
+    myproc()->state = RUNNING;
+  }
+  return 0;
+}
+
+int setup_trace(int dummy){
+  return trace_handler();
 }

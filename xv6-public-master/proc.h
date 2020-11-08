@@ -10,6 +10,16 @@ struct cpu {
   struct proc *proc;           // The process running on this cpu or null
 };
 
+typedef struct {
+  char name[100];
+  int pid;
+  int syscalls[27];
+  int valid;
+} proc_trace;
+
+extern int trace_state;
+extern proc_trace tracer[100];
+
 extern struct cpu cpus[NCPU];
 extern int ncpu;
 

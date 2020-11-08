@@ -96,16 +96,23 @@ int
 sys_reverse_number(void)
 {
   //code here
+  return reverse_number(myproc()->tf->ecx);
 }
 
 int 
-sys_trace_syscalls(int)
+sys_trace_syscalls(int x)
 {
-  //code here
+  trace_syscalls(x);
+  return 0;
 }
 
 int 
-sys_get_children(int)
+sys_get_children(int pid)
 {
-  //code here
+  return get_children(pid);
+}
+
+int 
+sys_setup_trace(void){
+  return setup_trace(1);
 }
