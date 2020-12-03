@@ -182,6 +182,7 @@ UPROGS=\
 	_wc\
 	_zombie\
 	_lcm\
+	_funcptr\
 	_reverse_number\
 	_trace_syscalls\
 	_get_children\
@@ -261,7 +262,11 @@ EXTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
 	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c lcm.c\
 	printf.c umalloc.c reverse_number.c trace_syscalls.c get_children.c\
+<<<<<<< HEAD
 	change_ratios_pl.c change_ratios_sl.c cpu_party.c htop.c level_change.c set_tickets.c\
+=======
+	funcptr.c\
+>>>>>>> b19f4cadd7ac9e62a0e544b79b7d37644e4b81d3
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
 
