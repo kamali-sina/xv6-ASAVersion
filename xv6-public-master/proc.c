@@ -1,11 +1,16 @@
 #include "types.h"
 #include "defs.h"
+#include "date.h"
 #include "param.h"
 #include "memlayout.h"
 #include "mmu.h"
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+
+int system_priority_ratio = 1;
+int system_arrival_time_ratio = 1;
+int system_executed_cycle_ratio = 1;
 
 int trace_state  = 0;
 int do_once = 1;
@@ -36,6 +41,11 @@ static char* list[] = {
     "trace_syscalls",
     "get_children",
     "setup_trace",
+    "level_change",
+    "set_tickets",
+    "change_ratios_pl",
+    "change_ratios_sl",
+    "htop",
     0
 };
 
@@ -130,9 +140,22 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
-
+  //giving value to new fileds
+  //TODO: double check
+  p->tickets = 10;
+  struct rtcdate t1;
+  cmostime(&t1);
+  int time = 0;
+  time += t1.second;
+  time += t1.minute * 100;
+  time += t1.hour * 10000;
+  p->arrival_time = time;
+  p->executed_cycle = 0;
+  p->arrival_time_ratio = system_arrival_time_ratio;
+  p->priority_ratio = system_priority_ratio;
+  p->executed_cycle_ratio = system_executed_cycle_ratio;
+  //end of costume values
   release(&ptable.lock);
-
   // Allocate kernel stack.
   if((p->kstack = kalloc()) == 0){
     p->state = UNUSED;
@@ -250,7 +273,21 @@ fork(void)
     if(curproc->ofile[i])
       np->ofile[i] = filedup(curproc->ofile[i]);
   np->cwd = idup(curproc->cwd);
-
+  //giving value to new fileds
+  //TODO: double check
+  np->tickets = 1;
+  struct rtcdate t1;
+  cmostime(&t1);
+  int time = 0;
+  time += t1.second;
+  time += t1.minute * 100;
+  time += t1.hour * 10000;
+  np->arrival_time = time;
+  np->executed_cycle = 0;
+  np->arrival_time_ratio = system_arrival_time_ratio;
+  np->priority_ratio = system_priority_ratio;
+  np->executed_cycle_ratio = system_executed_cycle_ratio;
+  //end of costume values
   safestrcpy(np->name, curproc->name, sizeof(curproc->name));
 
   pid = np->pid;
@@ -664,4 +701,26 @@ int trace_handler(){
 
 int setup_trace(int dummy){
   return trace_handler();
+}
+
+//TODO: Lab 3
+
+int level_change(int pid, int level){
+
+}
+
+int set_tickets(int pid, int tickets){
+
+}
+
+int change_ratios_pl(int pid, int priority_ratio, int arrival_time_ratio, int ec_ration){
+
+}
+
+int change_ratios_sl(int pid, int priority_ratio, int arrival_time_ratio, int ec_ration){
+
+}
+
+void htop(){
+
 }

@@ -116,3 +116,30 @@ int
 sys_setup_trace(void){
   return setup_trace(1);
 }
+
+//TODO: Lab 3
+
+int 
+sys_level_change(int pid, int level){
+
+}
+
+int 
+sys_set_tickets(int pid, int tickets){
+
+}
+
+int 
+sys_change_ratios_pl(int pid, int priority_ratio, int arrival_time_ratio, int ec_ration){
+
+}
+
+int 
+sys_change_ratios_sl(int pid, int priority_ratio, int arrival_time_ratio, int ec_ration){
+
+}
+
+void 
+sys_htop(){
+
+}

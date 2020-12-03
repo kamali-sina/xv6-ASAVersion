@@ -28,6 +28,12 @@ int reverse_number(void);
 int trace_syscalls(int);
 int get_children(int);
 int setup_trace(int);
+//Lab3
+int level_change(int, int);
+int set_tickets(int, int);
+int change_ratios_pl(int, int, int , int);
+int change_ratios_sl(int, int, int, int);
+void htop(void);
 
 // ulib.c
 int stat(const char*, struct stat*);

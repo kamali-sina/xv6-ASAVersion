@@ -107,6 +107,12 @@ extern int sys_reverse_number(void);
 extern int sys_trace_syscalls(void);
 extern int sys_get_children(void);
 extern int sys_setup_trace(void);
+//Lab3
+extern int sys_level_change(void);
+extern int sys_set_tickets(void);
+extern int sys_change_ratios_pl(void);
+extern int sys_change_ratios_sl(void);
+extern int sys_htop(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -134,7 +140,11 @@ static int (*syscalls[])(void) = {
 [SYS_trace_syscalls] sys_trace_syscalls,
 [SYS_get_children] sys_get_children,
 [SYS_setup_trace] sys_setup_trace,
-
+[SYS_level_change] sys_level_change,
+[SYS_set_tickets] sys_set_tickets,
+[SYS_change_ratios_pl] sys_change_ratios_pl,
+[SYS_change_ratios_sl] sys_change_ratios_sl,
+[SYS_htop] sys_htop,
 };
 
 int write_to_trace(int i, struct proc *proc){

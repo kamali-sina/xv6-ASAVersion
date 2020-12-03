@@ -126,6 +126,12 @@ int             reverse_number(int);
 int             trace_syscalls(int);
 int             get_children(int);
 int             setup_trace(int);
+int             level_change(int, int);
+int             set_tickets(int, int);
+int             change_ratios_pl(int, int, int, int);
+int             change_ratios_sl(int, int, int, int);
+void            htop(void);
+
 
 // swtch.S
 void            swtch(struct context**, struct context*);

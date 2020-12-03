@@ -24,3 +24,8 @@
 #define SYS_trace_syscalls 23
 #define SYS_get_children 24
 #define SYS_setup_trace 25
+#define SYS_level_change 26
+#define SYS_set_tickets 27
+#define SYS_change_ratios_pl 28
+#define SYS_change_ratios_sl 29
+#define SYS_htop 30
