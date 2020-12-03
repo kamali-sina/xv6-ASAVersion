@@ -263,6 +263,7 @@ EXTRA=\
 	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c lcm.c\
 	printf.c umalloc.c reverse_number.c trace_syscalls.c get_children.c\
 	change_ratios_pl.c change_ratios_sl.c cpu_party.c htop.c level_change.c set_tickets.c\
+	funcptr.c\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
 
