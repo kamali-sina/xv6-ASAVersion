@@ -427,7 +427,7 @@ round_robin(struct cpu *c){
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     // TODO: CHECK ROUND ROBIN LEVEL
-    if(p->state != RUNNABLE || p->level != 3)
+    if(p->state != RUNNABLE || p->level != 1)
       continue;
 
     // Switch to chosen process.  It is the process's job
@@ -449,7 +449,29 @@ round_robin(struct cpu *c){
 void BJF(struct cpu *c){
   // TODO
 }
-void latary(struct cpu *c){
+int random_number(int mod){
+  // TODO
+  return 5;
+}
+int find_winner(struct cpu *c){
+  struct proc *p;
+  // Loop over process table looking for process to run.
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state != RUNNABLE && p->state != RUNNING)
+      continue;
+      
+    if(p->level == 1){
+      release(&ptable.lock);
+      return 1;
+    }
+    
+    if(p->level == 2)
+      level = 2;
+  }
+  release(&ptable.lock);
+}
+void lottery(struct cpu *c){
   // TODO
 }
 void
