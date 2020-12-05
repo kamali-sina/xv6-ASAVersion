@@ -7,6 +7,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#define MAX_WAITONG_TIME 10000
 
 int system_priority_ratio = 1;
 int system_arrival_time_ratio = 1;
@@ -399,21 +400,33 @@ wait(void)
 //  - swtch to start running that process
 //  - eventually that process transfers control
 //      via swtch back to the scheduler.
+void agging(struct cpu *c, struct proc *p){
+  // TODO: Use Kamali's systemcall.
+}
+
 int level_finder(void){
   struct proc *p;
   int level = 3;
   // Loop over process table looking for process to run.
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    if(p->state != RUNNABLE && p->state != RUNNING)
+    if(p->state != RUNNABLE){
       continue;
-      
-    if(p->level == 1){
-      release(&ptable.lock);
-      return 1;
+      p->waited++;
     }
     
-    if(p->level == 2)
+    if(p->state != RUNNING)
+      continue;
+    
+    if(p->waited >= MAX_WAITONG_TIME)
+      agging(c, p);
+
+    if(p->level == 1){
+      release(&ptable.lock);
+      level = 1;
+    }
+
+    if(p->level == 2 && level != 1)
       level = 2;
   }
   release(&ptable.lock);
@@ -426,7 +439,6 @@ round_robin(struct cpu *c){
   // Loop over process table looking for process to run.
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    // TODO: CHECK ROUND ROBIN LEVEL
     if(p->state != RUNNABLE || p->level != 1)
       continue;
 
@@ -436,6 +448,7 @@ round_robin(struct cpu *c){
     c->proc = p;
     switchuvm(p);
     p->state = RUNNING;
+    p->executed_cycle += 0.1;
 
     swtch(&(c->scheduler), p->context);
     switchkvm();
@@ -471,6 +484,7 @@ void BJF(struct cpu *c){
   c->proc = p;
   switchuvm(p);
   p->state = RUNNING;
+  p->executed_cycle += 0.1;
 
   swtch(&(c->scheduler), p->context);
   switchkvm();
@@ -513,6 +527,7 @@ void lottery(struct cpu *c){
   c->proc = p;
   switchuvm(p);
   p->state = RUNNING;
+  p->executed_cycle += 0.1;
 
   swtch(&(c->scheduler), p->context);
   switchkvm();
@@ -523,6 +538,7 @@ void lottery(struct cpu *c){
 void
 scheduler(void)
 {
+  // TODO: put if and else
   struct cpu *c = mycpu();
   c->proc = 0;
   
@@ -543,7 +559,6 @@ scheduler(void)
 void
 sched(void)
 {
-  // TODO: add to executed cycle every time a program is set to running
   int intena;
   struct proc *p = myproc();
 

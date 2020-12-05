@@ -67,7 +67,8 @@ struct proc {
   int arrival_time_ratio;
   int executed_cycle_ratio;
   int level;
-  //TODO: maybe add level
+  int waited;
+  //TODO: waited shall be initiated zero when process is created
 };
 
 // Process memory is laid out contiguously, low addresses first:
