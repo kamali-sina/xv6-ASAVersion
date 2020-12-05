@@ -399,6 +399,27 @@ wait(void)
 //  - swtch to start running that process
 //  - eventually that process transfers control
 //      via swtch back to the scheduler.
+int level_finder(void){
+  struct proc *p;
+  int level = 3;
+  // Loop over process table looking for process to run.
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state != RUNNABLE && p->state != RUNNING)
+      continue;
+      
+    if(p->level == 1){
+      release(&ptable.lock);
+      return 1;
+    }
+    
+    if(p->level == 2)
+      level = 2;
+  }
+  release(&ptable.lock);
+  return level;
+}
+
 void 
 round_robin(struct cpu *c){
   struct proc *p;
