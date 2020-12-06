@@ -288,7 +288,7 @@ fork(void)
   time += t1.hour * 10000;
   np->arrival_time = time;
   np->executed_cycle = 0;
-  np->level = 3;
+  np->level = 1;
   np->waited = 0;
   np->arrival_time_ratio = system_arrival_time_ratio;
   np->priority_ratio = system_priority_ratio;
@@ -1006,8 +1006,16 @@ int change_ratios_sl(int pid, int priority_ratio, int arrival_time_ratio, int ec
 }
 
 void htop(){
+  static char *states[] = {
+  [UNUSED]    "unused",
+  [EMBRYO]    "embryo",
+  [SLEEPING]  "sleep ",
+  [RUNNABLE]  "runble",
+  [RUNNING]   "run   ",
+  [ZOMBIE]    "zombie"
+  };
   struct proc *p;
-  cprintf("name                     pid       state            tickets\n---------------------------------------------------------\n");
+  cprintf("name                 pid       state            tickets\n-----------------------------------------------------\n");
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->state == UNUSED)
       break;
@@ -1017,7 +1025,7 @@ void htop(){
       for (i = 0; i < 24 - strlen(p->name) ; i++){
         cprintf(" ");
       }
-      cprintf(" %d       %s                %d", p->pid, p->state, p->tickets);
+      cprintf(" %d       %s                %d", p->pid, states[p->state], p->tickets);
       cprintf("\n");
     }
   }
