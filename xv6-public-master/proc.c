@@ -881,6 +881,35 @@ int level_change(int pid, int level){
   return 1;
 }
 
+void copy_proc(struct proc *src, struct proc *dest){
+  dest->sz = dest->sz;                     // Size of process memory (bytes)
+  dest->pgdir = src->pgdir;                // Page table
+  dest->kstack = src->kstack;                // Bottom of kernel stack for this process
+  dest->state = src->state;        // Process state
+  dest->pid = src->pid;                     // Process ID
+  dest->parent = src->parent;         // Parent process
+  dest->tf = src->tf;        // Trap frame for current syscall
+  dest->context = src->context;     // swtch() here to run process
+  dest->chan = src->chan;                  // If non-zero, sleeping on chan
+  dest->killed = src->killed;                  // If non-zero, have been killed
+  int i;
+  for(i = 0; i < NOFILE; i++)
+    dest->ofile[i] = src->ofile[i];  // Open files
+  dest->cwd = src->cwd;           // Current directory
+  for(i = 0; i < 16; i++)
+    dest->name[i] = src->name[i];               // Process name (debugging)
+
+  dest->tickets = src->tickets;                 // number of tickets for lottory, priority of process is 1/ticket number
+  dest->arrival_time = src->arrival_time;             // time wich process has arrived
+  dest->executed_cycle = src->executed_cycle;        // time wich process was running
+  dest->priority_ratio = src->priority_ratio;
+  dest->arrival_time_ratio = src->arrival_time_ratio;
+  dest->executed_cycle_ratio = src->executed_cycle_ratio;
+  dest->level = src->level;
+  dest->waited = src->waited;
+  //TODO: waited 
+}
+
 int set_tickets(int pid, int tickets){
   struct proc *procNeeded;
   struct proc *p;
@@ -893,7 +922,17 @@ int set_tickets(int pid, int tickets){
   if (procNeeded == NULL)
     return 0;
   procNeeded->tickets = tickets;
-  //TODO: function send to end here!
+  struct proc temp;
+  copy_proc(procNeeded, &temp);
+  for(p = procNeeded+1; p < &ptable.proc[NPROC]; p++){
+    if(p->state == UNUSED){
+      copy(&temp, p);
+      break;
+    }
+    else{
+      copy(p, p-1);
+    }
+  }
   return 1;
 }
 
