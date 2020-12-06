@@ -143,6 +143,7 @@ found:
   p->pid = nextpid++;
   //giving value to new fileds
   //TODO: double check
+  // FIXME: why is minute multiplied with 100 and not 60?
   p->tickets = 10;
   struct rtcdate t1;
   cmostime(&t1);
@@ -412,12 +413,9 @@ int level_finder(void){
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->state != RUNNABLE){
       continue;
-      p->waited++;
     }
-    
-    if(p->state != RUNNING)
-      continue;
-    
+
+    p->waited++;
     if(p->waited >= MAX_WAITONG_TIME)
       agging(c, p);
 
@@ -493,8 +491,30 @@ void BJF(struct cpu *c){
   release(&ptable.lock);
 }
 int random_number(int mod){
-  // TODO
-  return 5;
+  struct rtcdate t1;
+  cmostime(&t1);
+  int time = 0;
+  time += t1.second;
+  time += t1.minute * 100;
+  time += t1.hour * 10000;
+  unsigned int next = time;
+  int result;
+
+  next *= 1103515245;
+  next += 12345;
+  result = (unsigned int) (next / 65536) % 2048;
+
+  next *= 1103515245;
+  next += 12345;
+  result <<= 10;
+  result ^= (unsigned int) (next / 65536) % 1024;
+
+  next *= 1103515245;
+  next += 12345;
+  result <<= 10;
+  result ^= (unsigned int) (next / 65536) % 1024;
+
+  return result % mod + 1;
 }
 struct proc * find_winner(struct cpu *c){
   struct proc *p;
@@ -507,7 +527,7 @@ struct proc * find_winner(struct cpu *c){
       
     mod += p->tickets;
 
-  int winner_number = find_winner(mod);
+  int winner_number = random_number(mod);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->state != RUNNABLE || p->level != 2)
       continue;
@@ -520,9 +540,25 @@ struct proc * find_winner(struct cpu *c){
   release(&ptable.lock);    
   return NULL;
 }
-void lottery(struct cpu *c){
-  // TODO: Check what happens when winners process won't finish in a time slot
-  struct proc *p = find_winner(c);
+struct proc *find_with_pid(struct cpu *c, int pid){
+  struct proc *p;
+  // Loop over process table looking for process to run.
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state != RUNNABLE || p->level != 2)
+      continue;
+    if(p->pid == pid){
+      release(&ptable.lock);  
+      return p;
+    }
+  }
+  release(&ptable.lock);   
+  return NULL;
+}
+void lottery(struct cpu *c, int pid){
+  struct proc *p = find_with_pid(c, pid);
+  if(p == NULL)
+    p = find_winner(c);
   acquire(&ptable.lock);
   c->proc = p;
   switchuvm(p);
@@ -538,14 +574,17 @@ void lottery(struct cpu *c){
 void
 scheduler(void)
 {
-  // TODO: put if and else
   struct cpu *c = mycpu();
   c->proc = 0;
-  
+  int pid = -1;
   for(;;){
     // Enable interrupts on this processor.
     sti();
-    round_robin(c);
+    switch(level_finder()){
+      case 1: round_robin(c);
+      case 2: pid = lottery(c, pid);
+      case 3: BJF(c);
+    }
   }
 }
 
