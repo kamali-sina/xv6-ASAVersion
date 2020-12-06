@@ -5,7 +5,6 @@
 int
 main(int argc, char *argv[])
 {
-
 	if(argc != 3){
 		printf(2, "number of argumants is exactly 2 argumants\n");
 		exit();
