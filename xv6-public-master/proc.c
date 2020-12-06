@@ -7,7 +7,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
-#define MAX_WAITONG_TIME 10000
+#define MAX_WAITING_TIME 10000
 #define NULL 0
 
 int system_priority_ratio = 1;
@@ -156,6 +156,8 @@ found:
   p->arrival_time_ratio = system_arrival_time_ratio;
   p->priority_ratio = system_priority_ratio;
   p->executed_cycle_ratio = system_executed_cycle_ratio;
+  p->level = 1;
+  p->waited = 0;
   //end of costume values
   release(&ptable.lock);
   // Allocate kernel stack.
@@ -286,6 +288,8 @@ fork(void)
   time += t1.hour * 10000;
   np->arrival_time = time;
   np->executed_cycle = 0;
+  np->level = 3;
+  np->waited = 0;
   np->arrival_time_ratio = system_arrival_time_ratio;
   np->priority_ratio = system_priority_ratio;
   np->executed_cycle_ratio = system_executed_cycle_ratio;
@@ -401,26 +405,28 @@ wait(void)
 //  - swtch to start running that process
 //  - eventually that process transfers control
 //      via swtch back to the scheduler.
-void agging(struct cpu *c, struct proc *p){
-  // TODO: Use Kamali's systemcall.
+void agging(struct proc *p){
+  cprintf("agged\n----------------------\n");
+  level_change(p->pid, 1);
+  p->waited = 0;
 }
 
 int level_finder(struct cpu *c){
   struct proc *p;
   int level = 3;
+  int flag = 0;
   // Loop over process table looking for process to run.
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->state != RUNNABLE){
       continue;
     }
-
+    flag = 1;
     p->waited++;
-    if(p->waited >= MAX_WAITONG_TIME)
-      agging(c, p);
+    if(p->waited >= MAX_WAITING_TIME)
+      agging(p);
 
     if(p->level == 1){
-      release(&ptable.lock);
       level = 1;
     }
 
@@ -428,6 +434,8 @@ int level_finder(struct cpu *c){
       level = 2;
   }
   release(&ptable.lock);
+  if(flag == 0)
+    return 4;
   return level;
 }
 
@@ -446,6 +454,7 @@ round_robin(struct cpu *c){
     c->proc = p;
     switchuvm(p);
     p->state = RUNNING;
+    p->waited--;
     p->executed_cycle += 0.1;
 
     swtch(&(c->scheduler), p->context);
@@ -460,7 +469,7 @@ round_robin(struct cpu *c){
 
 struct proc *find_best_job(struct cpu *c){
   struct proc *p;
-  // struct proc *min_rank = NULL;
+  struct proc *min_rank = NULL;
   float min_rank_value = -1;
   // Loop over process table looking for process to run.
   acquire(&ptable.lock);
@@ -471,19 +480,24 @@ struct proc *find_best_job(struct cpu *c){
     float rank = (p->priority_ratio / p->tickets) + (p->arrival_time * p->arrival_time_ratio) + (p->executed_cycle * p->executed_cycle_ratio);
     if(min_rank_value == -1 || min_rank_value > rank){
       min_rank_value = rank;
-      // min_rank = p;
+      min_rank = p;
     }
   }
   release(&ptable.lock); 
-  return NULL;
+  return min_rank;
 }
 
 void BJF(struct cpu *c){
   struct proc *p = find_best_job(c);
+  if(p == NULL){
+    cprintf("fuck------------------------\n");
+    return;
+  }
   acquire(&ptable.lock);
   c->proc = p;
   switchuvm(p);
   p->state = RUNNING;
+  p->waited--;
   p->executed_cycle += 0.1;
 
   swtch(&(c->scheduler), p->context);
@@ -531,7 +545,9 @@ struct proc * find_winner(struct cpu *c){
       
     mod += p->tickets;
   }
+  cprintf("mod %d\n", mod);
   int winner_number = random_number(mod);
+  cprintf("random number %d\n", winner_number);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->state != RUNNABLE || p->level != 2)
       continue;
@@ -539,10 +555,12 @@ struct proc * find_winner(struct cpu *c){
     winner_number -= p->tickets;
     if(winner_number <= 0){
       release(&ptable.lock);
+      cprintf("returning ppppppppppp-----------------------------------\n");
       return p;
     }
   }
-  release(&ptable.lock);    
+  release(&ptable.lock);  
+  cprintf("returning NULL-----------------------------------\n");  
   return NULL;
 }
 
@@ -551,33 +569,51 @@ struct proc *find_with_pid(struct cpu *c, int pid){
   // Loop over process table looking for process to run.
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    if(p->state != RUNNABLE || p->level != 2)
-      continue;
+    // if(p->state != RUNNABLE || p->level != 2)
+    //   continue;
     if(p->pid == pid){
       release(&ptable.lock);  
       return p;
     }
   }
   release(&ptable.lock);   
+  cprintf("returning null in pid\n"); 
   return NULL;
 }
 
 int lottery(struct cpu *c, int pid){
-  struct proc *p = find_with_pid(c, pid);
+  /* // cprintf("In lottery\n");
+  struct proc *p; //= find_with_pid(c, pid);
+  // cprintf("Out of find\n");
+  // if(p == NULL){
+  //   // cprintf("Before find winner\n");
+  //   p = find_winner(c);
+  //   // cprintf("After find winner in if\n");
+  // }
+  // else
+  //   cprintf("After find winner in else\n");
+  p = find_winner(c);
   if(p == NULL)
-    p = find_winner(c);
+    return -123;
+    
   acquire(&ptable.lock);
+  // cprintf("After acquire\n");
   c->proc = p;
   switchuvm(p);
   p->state = RUNNING;
+  p->waited--;
   p->executed_cycle += 0.1;
 
   swtch(&(c->scheduler), p->context);
   switchkvm();
 
+  // Process is done running for now.
+  // It should have changed its p->state before coming back.
   c->proc = 0;
   release(&ptable.lock);
-  return p->pid;
+  // cprintf("near return\n");
+  return p->pid; */
+  return 0;
 }
 
 void
@@ -585,14 +621,23 @@ scheduler(void)
 {
   struct cpu *c = mycpu();
   c->proc = 0;
-  int pid = -1;
+  int pid = -123;
   for(;;){
     // Enable interrupts on this processor.
     sti();
-    switch(level_finder(c)){
-      case 1: round_robin(c);
-      case 2: pid = lottery(c, pid);
+    int level = level_finder(c);
+    switch(level){
+      case 1: 
+        round_robin(c);
+        break;
+      case 2: 
+        pid = lottery(c, pid);
+        // cprintf("pid:  %d\n", pid);
+        break;
       case 3: BJF(c);
+        cprintf("::::::::::::::::||||||||||||||||||||||||||||\n");
+        break;
+      default: break;
     }
   }
 }
@@ -874,7 +919,7 @@ int level_change(int pid, int level){
       procNeeded = p;
     }
   }
-  if (procNeeded == NULL)
+  if (procNeeded == NULL || (level <= 0 && level >= 4))
     return 0;
   procNeeded->level = level;
   //
@@ -926,11 +971,11 @@ int set_tickets(int pid, int tickets){
   copy_proc(procNeeded, &temp);
   for(p = procNeeded+1; p < &ptable.proc[NPROC]; p++){
     if(p->state == UNUSED){
-      copy(&temp, p);
+      copy_proc(&temp, p);
       break;
     }
     else{
-      copy(p, p-1);
+      copy_proc(p, p-1);
     }
   }
   return 1;
@@ -964,6 +1009,8 @@ void htop(){
   struct proc *p;
   cprintf("name                     pid       state            tickets\n---------------------------------------------------------\n");
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state == UNUSED)
+      break;
     if (p != NULL){
       int i;
       cprintf("%s",p->name);
