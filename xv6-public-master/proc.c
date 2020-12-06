@@ -1036,7 +1036,18 @@ void htop(){
       for (i = 0; i < 20 - strlen(p->name) ; i++){
         cprintf(" ");
       }
-      cprintf(" %d         %s              %d", p->pid, states[p->state], p->tickets);
+      cprintf(" %d", p->pid);
+      int n = p->pid;
+      int count = 0;
+      while (n != 0) 
+      {
+          n = n / 10;
+          ++count;
+      }
+      for (i = 0; i < 10 - count ; i++){
+        cprintf(" ");
+      }
+      cprintf("%s              %d", states[p->state], p->tickets);
       cprintf("\n");
     }
   }
