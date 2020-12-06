@@ -8,6 +8,7 @@
 #include "proc.h"
 #include "spinlock.h"
 #define MAX_WAITONG_TIME 10000
+#define NULL 0
 
 int system_priority_ratio = 1;
 int system_arrival_time_ratio = 1;
@@ -143,7 +144,6 @@ found:
   p->pid = nextpid++;
   //giving value to new fileds
   //TODO: double check
-  // FIXME: why is minute multiplied with 100 and not 60?
   p->tickets = 10;
   struct rtcdate t1;
   cmostime(&t1);
@@ -405,7 +405,7 @@ void agging(struct cpu *c, struct proc *p){
   // TODO: Use Kamali's systemcall.
 }
 
-int level_finder(void){
+int level_finder(struct cpu *c){
   struct proc *p;
   int level = 3;
   // Loop over process table looking for process to run.
@@ -457,9 +457,10 @@ round_robin(struct cpu *c){
   }
   release(&ptable.lock);
 }
+
 struct proc *find_best_job(struct cpu *c){
   struct proc *p;
-  struct proc *min_rank = NULL;
+  // struct proc *min_rank = NULL;
   float min_rank_value = -1;
   // Loop over process table looking for process to run.
   acquire(&ptable.lock);
@@ -470,7 +471,7 @@ struct proc *find_best_job(struct cpu *c){
     float rank = (p->priority_ratio / p->tickets) + (p->arrival_time * p->arrival_time_ratio) + (p->executed_cycle * p->executed_cycle_ratio);
     if(min_rank_value == -1 || min_rank_value > rank){
       min_rank_value = rank;
-      min_rank = p;
+      // min_rank = p;
     }
   }
   release(&ptable.lock); 
@@ -491,6 +492,7 @@ void BJF(struct cpu *c){
   c->proc = 0;
   release(&ptable.lock);
 }
+
 int random_number(int mod){
   struct rtcdate t1;
   cmostime(&t1);
@@ -517,6 +519,7 @@ int random_number(int mod){
 
   return result % mod + 1;
 }
+
 struct proc * find_winner(struct cpu *c){
   struct proc *p;
   int mod = 0;
@@ -542,6 +545,7 @@ struct proc * find_winner(struct cpu *c){
   release(&ptable.lock);    
   return NULL;
 }
+
 struct proc *find_with_pid(struct cpu *c, int pid){
   struct proc *p;
   // Loop over process table looking for process to run.
@@ -557,7 +561,8 @@ struct proc *find_with_pid(struct cpu *c, int pid){
   release(&ptable.lock);   
   return NULL;
 }
-void lottery(struct cpu *c, int pid){
+
+int lottery(struct cpu *c, int pid){
   struct proc *p = find_with_pid(c, pid);
   if(p == NULL)
     p = find_winner(c);
@@ -572,7 +577,9 @@ void lottery(struct cpu *c, int pid){
 
   c->proc = 0;
   release(&ptable.lock);
+  return p->pid;
 }
+
 void
 scheduler(void)
 {
@@ -582,7 +589,7 @@ scheduler(void)
   for(;;){
     // Enable interrupts on this processor.
     sti();
-    switch(level_finder()){
+    switch(level_finder(c)){
       case 1: round_robin(c);
       case 2: pid = lottery(c, pid);
       case 3: BJF(c);
@@ -858,30 +865,74 @@ int setup_trace(int dummy){
   return trace_handler();
 }
 
-//TODO: Lab 3
-
 int level_change(int pid, int level){
-
+  struct proc *procNeeded;
+  struct proc *p;
+  procNeeded = NULL;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if (p->pid == pid){
+      procNeeded = p;
+    }
+  }
+  if (procNeeded == NULL)
+    return 0;
+  procNeeded->level = level;
+  //
+  return 1;
 }
 
 int set_tickets(int pid, int tickets){
-
+  struct proc *procNeeded;
+  struct proc *p;
+  procNeeded = NULL;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if (p->pid == pid){
+      procNeeded = p;
+    }
+  }
+  if (procNeeded == NULL)
+    return 0;
+  procNeeded->tickets = tickets;
+  //TODO: function send to end here!
+  return 1;
 }
 
 int change_ratios_pl(int pid, int priority_ratio, int arrival_time_ratio, int ec_ration){
-
+  struct proc *procNeeded;
+  struct proc *p;
+  procNeeded = NULL;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if (p->pid == pid){
+      procNeeded = p;
+    }
+  }
+  if (procNeeded == NULL)
+    return 0;
+  procNeeded->priority_ratio = priority_ratio;
+  procNeeded->arrival_time_ratio = arrival_time_ratio;
+  procNeeded->executed_cycle_ratio = ec_ration;
+  return 1;
 }
 
 int change_ratios_sl(int pid, int priority_ratio, int arrival_time_ratio, int ec_ration){
-
+  system_priority_ratio = priority_ratio;
+  system_executed_cycle_ratio = ec_ration;
+  system_arrival_time_ratio = arrival_time_ratio;
+  return 1;
 }
 
 void htop(){
-  int i;
+  struct proc *p;
+  cprintf("name                     pid       state            tickets\n---------------------------------------------------------\n");
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if (p != NULL){
-      cprintf("name       pid       state        ticket\n----------------------------------------");
+      int i;
+      cprintf("%s",p->name);
+      for (i = 0; i < 24 - strlen(p->name) ; i++){
+        cprintf(" ");
+      }
+      cprintf(" %d       %s                %d", p->pid, p->state, p->tickets);
+      cprintf("\n");
     }
   }
 }
-/*       */

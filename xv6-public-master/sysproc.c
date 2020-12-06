@@ -121,25 +121,25 @@ sys_setup_trace(void){
 
 int 
 sys_level_change(int pid, int level){
-
+  return level_change(pid, level);
 }
 
 int 
 sys_set_tickets(int pid, int tickets){
-
+  return set_tickets(pid, tickets);
 }
 
 int 
 sys_change_ratios_pl(int pid, int priority_ratio, int arrival_time_ratio, int ec_ration){
-
+  return change_ratios_pl(pid, priority_ratio, arrival_time_ratio, ec_ration);
 }
 
 int 
 sys_change_ratios_sl(int pid, int priority_ratio, int arrival_time_ratio, int ec_ration){
-
+  return change_ratios_sl(pid, priority_ratio, arrival_time_ratio, ec_ration);
 }
 
 void 
 sys_htop(){
-
+  htop();
 }
