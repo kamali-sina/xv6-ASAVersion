@@ -182,16 +182,15 @@ UPROGS=\
 	_wc\
 	_zombie\
 	_lcm\
-	_funcptr\
 	_reverse_number\
 	_trace_syscalls\
 	_get_children\
-	_change_ratios_sl\
-	_change_ratios_pl\
+	_c_ratios_sl\
+	_c_ratios_pl\
 	_cpu_party\
 	_htop\
 	_level_change\
-	_set_tickets\
+	_set_tik\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
@@ -260,10 +259,9 @@ qemu-nox-gdb: fs.img xv6.img .gdbinit
 
 EXTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
-	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c lcm.c funcptr.c\
+	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c lcm.c\
 	printf.c umalloc.c reverse_number.c trace_syscalls.c get_children.c\
-	change_ratios_sl.c change_ratios_pl.c cpu_party.c htop.c level_change.c\
-	set_tickets.c\
+	c_ratios_sl.c c_ratios_pl.c cpu_party.c htop.c level_change.c set_tik.c\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
 

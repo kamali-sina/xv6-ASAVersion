@@ -917,26 +917,6 @@ int trace_handler(){
   return 0;
 }
 
-int setup_trace(int dummy){
-  return trace_handler();
-}
-
-int level_change(int pid, int level){
-  struct proc *procNeeded;
-  struct proc *p;
-  procNeeded = NULL;
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    if (p->pid == pid){
-      procNeeded = p;
-    }
-  }
-  if (procNeeded == NULL || (level <= 0 && level >= 4))
-    return 0;
-  procNeeded->level = level;
-  //
-  return 1;
-}
-
 void copy_proc(struct proc *src, struct proc *dest){
   dest->sz = dest->sz;                     // Size of process memory (bytes)
   dest->pgdir = src->pgdir;                // Page table
@@ -966,29 +946,57 @@ void copy_proc(struct proc *src, struct proc *dest){
   //TODO: waited 
 }
 
-int set_tickets(int pid, int tickets){
+int setup_trace(int dummy){
+  return trace_handler();
+}
+
+int level_change(int pid, int level){
   struct proc *procNeeded;
   struct proc *p;
   procNeeded = NULL;
+  // acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if (p->pid == pid){
       procNeeded = p;
     }
   }
-  if (procNeeded == NULL)
+  if (procNeeded == NULL || (level <= 0 && level >= 4)){
+    release(&ptable.lock);
     return 0;
-  procNeeded->tickets = tickets;
-  struct proc temp;
-  copy_proc(procNeeded, &temp);
-  for(p = procNeeded+1; p < &ptable.proc[NPROC]; p++){
-    if(p->state == UNUSED){
-      copy_proc(&temp, p);
-      break;
-    }
-    else{
-      copy_proc(p, p-1);
+  }
+  procNeeded->level = level;
+  // copy
+  // struct proc temp;
+  // copy_proc(procNeeded, &temp);
+  // for(p = procNeeded+1; p < &ptable.proc[NPROC]; p++){
+  //   if(p->state == UNUSED){
+  //     copy_proc(&temp, p);
+  //     break;
+  //   }
+  //   else{
+  //     copy_proc(p, p-1);
+  //   }
+  // }
+  // release(&ptable.lock);
+  return 1;
+}
+
+int set_tickets(int pid, int tickets){
+  struct proc *procNeeded;
+  struct proc *p;
+  procNeeded = NULL;
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if (p->pid == pid){
+      procNeeded = p;
     }
   }
+  if (procNeeded == NULL){
+    release(&ptable.lock);
+    return 0;
+  }
+  procNeeded->tickets = tickets;
+  release(&ptable.lock);
   return 1;
 }
 
@@ -996,16 +1004,20 @@ int change_ratios_pl(int pid, int priority_ratio, int arrival_time_ratio, int ec
   struct proc *procNeeded;
   struct proc *p;
   procNeeded = NULL;
+  acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if (p->pid == pid){
       procNeeded = p;
     }
   }
-  if (procNeeded == NULL)
+  if (procNeeded == NULL){
+    release(&ptable.lock);
     return 0;
+  }
   procNeeded->priority_ratio = priority_ratio;
   procNeeded->arrival_time_ratio = arrival_time_ratio;
   procNeeded->executed_cycle_ratio = ec_ration;
+  release(&ptable.lock);
   return 1;
 }
 
@@ -1027,6 +1039,7 @@ void htop(){
   };
   struct proc *p;
   cprintf("name                 pid       state            tickets\n-------------------------------------------------------\n");
+  acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->state == UNUSED)
       break;
@@ -1051,4 +1064,5 @@ void htop(){
       cprintf("\n");
     }
   }
+  release(&ptable.lock);
 }
