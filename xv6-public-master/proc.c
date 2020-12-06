@@ -951,6 +951,8 @@ int setup_trace(int dummy){
 }
 
 int level_change(int pid, int level){
+  argint(0, &pid);
+  argint(1, &level);
   struct proc *procNeeded;
   struct proc *p;
   procNeeded = NULL;
@@ -982,6 +984,8 @@ int level_change(int pid, int level){
 }
 
 int set_tickets(int pid, int tickets){
+  argint(0, &pid);
+  argint(1, &tickets);
   struct proc *procNeeded;
   struct proc *p;
   procNeeded = NULL;
@@ -1001,6 +1005,10 @@ int set_tickets(int pid, int tickets){
 }
 
 int change_ratios_pl(int pid, int priority_ratio, int arrival_time_ratio, int ec_ration){
+  argint(0, &pid);
+  argint(1, &priority_ratio);
+  argint(2, &arrival_time_ratio);
+  argint(3, &ec_ration);
   struct proc *procNeeded;
   struct proc *p;
   procNeeded = NULL;
@@ -1022,6 +1030,10 @@ int change_ratios_pl(int pid, int priority_ratio, int arrival_time_ratio, int ec
 }
 
 int change_ratios_sl(int pid, int priority_ratio, int arrival_time_ratio, int ec_ration){
+  argint(0, &pid);
+  argint(1, &priority_ratio);
+  argint(2, &arrival_time_ratio);
+  argint(3, &ec_ration);
   system_priority_ratio = priority_ratio;
   system_executed_cycle_ratio = ec_ration;
   system_arrival_time_ratio = arrival_time_ratio;
