@@ -406,7 +406,7 @@ wait(void)
 //  - eventually that process transfers control
 //      via swtch back to the scheduler.
 void agging(struct proc *p){
-  level_change(p->pid, 1);
+  p->level = 1;
   p->waited = 0;
 }
 
@@ -956,7 +956,7 @@ int level_change(int pid, int level){
   struct proc *procNeeded;
   struct proc *p;
   procNeeded = NULL;
-  // acquire(&ptable.lock);
+  acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if (p->pid == pid){
       procNeeded = p;
@@ -968,18 +968,20 @@ int level_change(int pid, int level){
   }
   procNeeded->level = level;
   // copy
-  // struct proc temp;
-  // copy_proc(procNeeded, &temp);
-  // for(p = procNeeded+1; p < &ptable.proc[NPROC]; p++){
-  //   if(p->state == UNUSED){
-  //     copy_proc(&temp, p);
-  //     break;
-  //   }
-  //   else{
-  //     copy_proc(p, p-1);
-  //   }
-  // }
-  // release(&ptable.lock);
+  struct proc temp;
+  
+  copy_proc(procNeeded, &temp);
+  // acquire(&ptable.lock);
+  for(p = procNeeded+1; p < &ptable.proc[NPROC]; p++){
+    if(p->state == UNUSED){
+      copy_proc(&temp, p);
+      break;
+    }
+    else{
+      copy_proc(p, p-1);
+    }
+  }
+  release(&ptable.lock);
   return 1;
 }
 
