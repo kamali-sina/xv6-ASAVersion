@@ -16,10 +16,6 @@ main(int argc, char *argv[])
             for (int i = 0; i < 1000000; i++){
                 booze = drink(booze);
             }
-        }else{
-            for (int i = 0; i < 100000; i++){
-                booze = drink(booze);
-            }
         }
     }
     exit();

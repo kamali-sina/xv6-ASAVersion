@@ -288,7 +288,7 @@ fork(void)
   time += t1.hour * 10000;
   np->arrival_time = time;
   np->executed_cycle = 0;
-  np->level = 1;
+  np->level = 2;
   np->waited = 0;
   np->arrival_time_ratio = system_arrival_time_ratio;
   np->priority_ratio = system_priority_ratio;
@@ -406,7 +406,6 @@ wait(void)
 //  - eventually that process transfers control
 //      via swtch back to the scheduler.
 void agging(struct proc *p){
-  cprintf("agged\n----------------------\n");
   level_change(p->pid, 1);
   p->waited = 0;
 }
@@ -488,22 +487,35 @@ struct proc *find_best_job(struct cpu *c){
 }
 
 void BJF(struct cpu *c){
-  struct proc *p = find_best_job(c);
-  if(p == NULL){
+  struct proc *best_job = find_best_job(c);
+  struct proc *p;
+  if(best_job == NULL){
     cprintf("fuck------------------------\n");
     return;
   }
   acquire(&ptable.lock);
-  c->proc = p;
-  switchuvm(p);
-  p->state = RUNNING;
-  p->waited--;
-  p->executed_cycle += 0.1;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state != RUNNABLE || p->level != 1)
+      continue;
 
-  swtch(&(c->scheduler), p->context);
-  switchkvm();
+    // Switch to chosen process.  It is the process's job
+    // to release ptable.lock and then reacquire it
+    // before jumping back to us.
+    if(best_job != p)
+      continue;
+    c->proc = p;
+    switchuvm(p);
+    p->state = RUNNING;
+    p->waited--;
+    p->executed_cycle += 0.1;
 
-  c->proc = 0;
+    swtch(&(c->scheduler), p->context);
+    switchkvm();
+
+    // Process is done running for now.
+    // It should have changed its p->state before coming back.
+    c->proc = 0;
+  }
   release(&ptable.lock);
 }
 
@@ -545,9 +557,7 @@ struct proc * find_winner(struct cpu *c){
       
     mod += p->tickets;
   }
-  cprintf("mod %d\n", mod);
   int winner_number = random_number(mod);
-  cprintf("random number %d\n", winner_number);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->state != RUNNABLE || p->level != 2)
       continue;
@@ -555,12 +565,10 @@ struct proc * find_winner(struct cpu *c){
     winner_number -= p->tickets;
     if(winner_number <= 0){
       release(&ptable.lock);
-      cprintf("returning ppppppppppp-----------------------------------\n");
       return p;
     }
   }
-  release(&ptable.lock);  
-  cprintf("returning NULL-----------------------------------\n");  
+  release(&ptable.lock);   
   return NULL;
 }
 
@@ -577,43 +585,47 @@ struct proc *find_with_pid(struct cpu *c, int pid){
     }
   }
   release(&ptable.lock);   
-  cprintf("returning null in pid\n"); 
   return NULL;
 }
 
 int lottery(struct cpu *c, int pid){
-  /* // cprintf("In lottery\n");
-  struct proc *p; //= find_with_pid(c, pid);
-  // cprintf("Out of find\n");
-  // if(p == NULL){
-  //   // cprintf("Before find winner\n");
-  //   p = find_winner(c);
-  //   // cprintf("After find winner in if\n");
-  // }
-  // else
-  //   cprintf("After find winner in else\n");
-  p = find_winner(c);
-  if(p == NULL)
+  // cprintf("In lottery\n");
+  struct proc *winner_proc = find_with_pid(c, pid);
+  if(winner_proc == NULL){
+    winner_proc = find_winner(c);
+  }
+  // p = find_winner(c);
+  if(winner_proc == NULL)
     return -123;
-    
+  
+  struct proc *p;
+  // Loop over process table looking for process to run.
   acquire(&ptable.lock);
-  // cprintf("After acquire\n");
-  c->proc = p;
-  switchuvm(p);
-  p->state = RUNNING;
-  p->waited--;
-  p->executed_cycle += 0.1;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state != RUNNABLE || p->level != 1)
+      continue;
 
-  swtch(&(c->scheduler), p->context);
-  switchkvm();
+    // Switch to chosen process.  It is the process's job
+    // to release ptable.lock and then reacquire it
+    // before jumping back to us.
+    if(p != winner_proc)
+      continue;
 
-  // Process is done running for now.
-  // It should have changed its p->state before coming back.
-  c->proc = 0;
+    c->proc = p;
+    switchuvm(p);
+    p->state = RUNNING;
+    p->waited--;
+    p->executed_cycle += 0.1;
+
+    swtch(&(c->scheduler), p->context);
+    switchkvm();
+
+    // Process is done running for now.
+    // It should have changed its p->state before coming back.
+    c->proc = 0;
+  }
   release(&ptable.lock);
-  // cprintf("near return\n");
-  return p->pid; */
-  return 0;
+  return -123;
 }
 
 void
@@ -635,7 +647,6 @@ scheduler(void)
         // cprintf("pid:  %d\n", pid);
         break;
       case 3: BJF(c);
-        cprintf("::::::::::::::::||||||||||||||||||||||||||||\n");
         break;
       default: break;
     }
@@ -1015,17 +1026,17 @@ void htop(){
   [ZOMBIE]    "zombie"
   };
   struct proc *p;
-  cprintf("name                 pid       state            tickets\n-----------------------------------------------------\n");
+  cprintf("name                 pid       state            tickets\n-------------------------------------------------------\n");
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->state == UNUSED)
       break;
     if (p != NULL){
       int i;
       cprintf("%s",p->name);
-      for (i = 0; i < 24 - strlen(p->name) ; i++){
+      for (i = 0; i < 20 - strlen(p->name) ; i++){
         cprintf(" ");
       }
-      cprintf(" %d       %s                %d", p->pid, states[p->state], p->tickets);
+      cprintf(" %d         %s              %d", p->pid, states[p->state], p->tickets);
       cprintf("\n");
     }
   }
