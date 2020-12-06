@@ -467,15 +467,16 @@ struct proc *find_best_job(struct cpu *c){
     if(p->state != RUNNABLE || p->level != 3)
       continue;
     
-    float rank = (p->priority_ratio / p->tickets) + (p->arrival_time * p->arrival_time_ratio) + (p->executed_cycle * p->executed_cycle_ratio)
+    float rank = (p->priority_ratio / p->tickets) + (p->arrival_time * p->arrival_time_ratio) + (p->executed_cycle * p->executed_cycle_ratio);
     if(min_rank_value == -1 || min_rank_value > rank){
       min_rank_value = rank;
       min_rank = p;
     }
-
+  }
   release(&ptable.lock); 
   return NULL;
 }
+
 void BJF(struct cpu *c){
   struct proc *p = find_best_job(c);
   acquire(&ptable.lock);
@@ -526,7 +527,7 @@ struct proc * find_winner(struct cpu *c){
       continue;
       
     mod += p->tickets;
-
+  }
   int winner_number = random_number(mod);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->state != RUNNABLE || p->level != 2)
@@ -537,6 +538,7 @@ struct proc * find_winner(struct cpu *c){
       release(&ptable.lock);
       return p;
     }
+  }
   release(&ptable.lock);    
   return NULL;
 }
@@ -875,5 +877,11 @@ int change_ratios_sl(int pid, int priority_ratio, int arrival_time_ratio, int ec
 }
 
 void htop(){
-
+  int i;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if (p != NULL){
+      cprintf("name       pid       state        ticket\n----------------------------------------");
+    }
+  }
 }
+/*       */
