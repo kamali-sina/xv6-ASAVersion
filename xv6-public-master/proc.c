@@ -926,11 +926,11 @@ int set_tickets(int pid, int tickets){
   copy_proc(procNeeded, &temp);
   for(p = procNeeded+1; p < &ptable.proc[NPROC]; p++){
     if(p->state == UNUSED){
-      copy(&temp, p);
+      copy_proc(&temp, p);
       break;
     }
     else{
-      copy(p, p-1);
+      copy_proc(p, p-1);
     }
   }
   return 1;
