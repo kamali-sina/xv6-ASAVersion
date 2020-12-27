@@ -6,6 +6,8 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#define NULL 0
+semaphore system_semaphores[5];
 
 struct {
   struct spinlock lock;
@@ -531,4 +533,70 @@ procdump(void)
     }
     cprintf("\n");
   }
+}
+// LAB 4
+
+struct proc * find_proc(int pid){
+  struct proc* procNeeded = NULL;
+  struct proc *p;
+  // acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if (p->pid == pid){
+      procNeeded = p;
+      break;
+    }
+  }
+  return procNeeded;
+}
+
+int semaphore_aquire(int sid){
+  argint(0, &sid);
+  system_semaphores[sid].value--;
+  int value = system_semaphores[sid].value;
+  int num_of_procs = system_semaphores[sid].num_of_procs;
+  if (value < 0){
+    system_semaphores[sid].list[num_of_procs] =  myproc();
+
+    acquire(&ptable.lock);
+    system_semaphores[sid].list[num_of_procs]->state = SLEEPING;
+    sched();
+    release(&ptable.lock);
+    
+    system_semaphores[sid].num_of_procs++;
+  }
+  return 1;
+}
+
+int semaphore_release(int sid){
+  argint(0, &sid);
+  system_semaphores[sid].value++;
+  int num_of_procs = system_semaphores[sid].num_of_procs;
+  int value = system_semaphores[sid].value;
+  if (value <= 0){
+    //TODO: check if ridim
+    acquire(&ptable.lock);
+    system_semaphores[sid].list[0]->state = RUNNABLE;
+    release(&ptable.lock);
+    
+    for (int i = 1 ; i < num_of_procs ; i++){
+      system_semaphores[sid].list[i-1] = system_semaphores[sid].list[i]; 
+    }
+    system_semaphores[sid].num_of_procs--;
+  }
+  return 1;
+}
+
+/* m: init proc number
+   v: maximum number of procs in critical section */
+int semaphore_initialize(int sid, int v, int m){
+  argint(0, &sid);
+  argint(1, &v);
+  argint(2, &m);
+  if (sid < 0 || sid > 4 || v < 0 || m < 0){
+    return 0;
+  }
+  system_semaphores[sid].value = v;
+  system_semaphores[sid].m = m;
+  system_semaphores[sid].num_of_procs = 0;
+  return 1;
 }

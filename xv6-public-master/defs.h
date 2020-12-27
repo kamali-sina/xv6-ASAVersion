@@ -156,6 +156,11 @@ int             fetchint(uint, int*);
 int             fetchstr(uint, char**);
 void            syscall(void);
 
+// syscalls
+int             semaphore_initialize(int, int, int);
+int             semaphore_aquire(int);
+int             semaphore_release(int);
+
 // timer.c
 void            timerinit(void);
 

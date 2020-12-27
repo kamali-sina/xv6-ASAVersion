@@ -89,3 +89,21 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+int 
+sys_semaphore_initialize(int sid, int v, int m)
+{
+  semaphore_initialize(sid,v,m);
+  return 0;
+}
+
+int 
+sys_semaphore_aquire(int sid)
+{
+  return semaphore_aquire(sid);
+}
+
+int 
+sys_semaphore_release(int sid)
+{
+  return semaphore_release(sid);
+}

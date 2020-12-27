@@ -103,6 +103,10 @@ extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
+//Lab4
+extern int sys_semaphore_aquire(void);
+extern int sys_semaphore_release(void);
+extern int sys_semaphore_initialize(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -126,6 +130,9 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_semaphore_initialize] sys_semaphore_initialize,
+[SYS_semaphore_aquire] sys_semaphore_aquire,
+[SYS_semaphore_release] sys_semaphore_release,
 };
 
 void

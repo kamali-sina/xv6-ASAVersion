@@ -13,6 +13,13 @@ struct cpu {
 extern struct cpu cpus[NCPU];
 extern int ncpu;
 
+typedef struct {
+  int value;
+  int m;
+  int num_of_procs;
+  struct proc* list[20];
+} semaphore;
+
 //PAGEBREAK: 17
 // Saved registers for kernel context switches.
 // Don't need to save all the segment registers (%cs, etc),
