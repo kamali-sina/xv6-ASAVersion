@@ -965,8 +965,6 @@ int level_change(int pid, int level){
     return 0;
   }
   procNeeded->level = level;
-<<<<<<< HEAD
-=======
   // copy
   struct proc temp;
   
@@ -982,7 +980,6 @@ int level_change(int pid, int level){
     }
   }
   release(&ptable.lock);
->>>>>>> refs/remotes/origin/main
   return 1;
 }
 
@@ -1107,7 +1104,7 @@ int semaphore_aquire(int sid){
     system_semaphores[sid].list[num_of_procs]->state = SLEEPING;
     system_semaphores[sid].num_of_procs++;
   }
-  return 0;
+  return 1;
 }
 
 int semaphore_release(int sid){
@@ -1123,7 +1120,7 @@ int semaphore_release(int sid){
     }
     system_semaphores[sid].num_of_procs--;
   }
-  return 0;
+  return 1;
 }
 
 /* m: init proc number
@@ -1133,10 +1130,10 @@ int semaphore_initialize(int sid, int v, int m){
   argint(1, &v);
   argint(2, &m);
   if (sid < 0 || sid > 4 || v < 0 || m < 0){
-    return -1;
+    return 0;
   }
   system_semaphores[sid].value = v;
   system_semaphores[sid].m = m;
   system_semaphores[sid].num_of_procs = 0;
-  return 0;
+  return 1;
 }
