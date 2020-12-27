@@ -15,8 +15,9 @@ main(int argc, char *argv[])
 	for(shots = 0; shots < drunk; shots++) {
         int pid = fork();
         if (pid == 0){
-            for (int i = 0; i < 1000000; i++){
+            for (int i = 0; i < 10000000; i++){
                 booze = drink(booze);
+                sleep(1);
                 exit();
             }
         }
