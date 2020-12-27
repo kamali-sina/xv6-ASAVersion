@@ -1,9 +1,10 @@
-#include "usr_lock.h"
+#include "types.h"
+#include "user.h"
 
 int main(){
-    struct condvar* condition = (struct condvar*)malloc(sizeof(struct condvar));
-    cv_init(condition);
-    init_lock(&condition->lock);
+    struct spinlock lk;
+    init_lock(&lk);
+    lock(&lk);
     int pid = fork();
     if(pid < 0){
         printf(1, "Error forking first child.\n");
@@ -11,9 +12,7 @@ int main(){
     else{
         if(pid == 0){
             printf(1, "Child 1 executing.\n");
-            lock(&condition->lock);
-            cv_signal(condition);
-            unlock(&condition->lock);
+            unlock(&lk);
         }
         else{
             pid = fork();
@@ -22,9 +21,6 @@ int main(){
             }
             else{
                 if(pid == 0){
-                    lock(&condition->lock);
-                    cv_wait(condition);
-                    unlock(&condition->lock);
                     printf(1, "Child 2 executing.\n");
                     
                 }

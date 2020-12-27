@@ -104,3 +104,31 @@ memmove(void *vdst, const void *vsrc, int n)
     *dst++ = *src++;
   return vdst;
 }
+
+// lab4
+void
+init_lock(struct spinlock *lk)
+{
+  //lk->name = name;
+  lk->locked = 0;
+  lk->cpu = 0;
+}
+
+// Acquire the lock.
+// Loops (spins) until the lock is acquired.
+// Holding a lock for a long time may cause
+// other CPUs to waste time spinning to acquire it.
+void
+lock(struct spinlock *lk)
+{
+  // The xchg is atomic.
+  while(xchg(&lk->locked, 1) != 0)
+    ;
+}
+
+// Release the lock.
+void
+unlock(struct spinlock *lk)
+{
+  asm volatile("movl $0, %0" : "+m" (lk->locked) : );
+}

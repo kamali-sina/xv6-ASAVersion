@@ -1,3 +1,4 @@
+#include "spinlock.h"
 struct stat;
 struct rtcdate;
 struct condvar;
@@ -48,3 +49,8 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+
+// Lab 4
+void init_lock(struct spinlock *lk);
+void lock(struct spinlock *lk);
+void unlock(struct spinlock *lk);
