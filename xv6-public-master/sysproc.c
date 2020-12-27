@@ -117,7 +117,7 @@ sys_setup_trace(void){
   return setup_trace(1);
 }
 
-//TODO: Lab 3
+// Lab 3
 
 int 
 sys_level_change(int pid, int level){
@@ -142,4 +142,24 @@ sys_change_ratios_sl(int pid, int priority_ratio, int arrival_time_ratio, int ec
 void 
 sys_htop(){
   htop();
+}
+
+//Lab 4
+
+int 
+sys_semaphore_initialize(int sid, int v, int m)
+{
+  return semaphore_initialize(sid,v,m);
+}
+
+int 
+sys_semaphore_aquire(int sid)
+{
+  return semaphore_aquire(sid);
+}
+
+int 
+sys_semaphore_release(int sid)
+{
+  return semaphore_release(sid);
 }

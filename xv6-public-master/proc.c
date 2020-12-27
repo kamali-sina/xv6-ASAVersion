@@ -17,6 +17,7 @@ int system_executed_cycle_ratio = 1;
 int trace_state  = 0;
 int do_once = 1;
 proc_trace tracer[100];
+semaphore system_semaphores[5];
 static char* list[] = {
     "fork",
     "exit",
@@ -143,7 +144,6 @@ found:
   p->state = EMBRYO;
   p->pid = nextpid++;
   //giving value to new fileds
-  //TODO: double check
   p->tickets = 10;
   struct rtcdate t1;
   cmostime(&t1);
@@ -278,7 +278,6 @@ fork(void)
       np->ofile[i] = filedup(curproc->ofile[i]);
   np->cwd = idup(curproc->cwd);
   //giving value to new fileds
-  //TODO: double check
   np->tickets = 1;
   struct rtcdate t1;
   cmostime(&t1);
@@ -943,7 +942,6 @@ void copy_proc(struct proc *src, struct proc *dest){
   dest->executed_cycle_ratio = src->executed_cycle_ratio;
   dest->level = src->level;
   dest->waited = src->waited;
-  //TODO: waited 
 }
 
 int setup_trace(int dummy){
@@ -967,19 +965,6 @@ int level_change(int pid, int level){
     return 0;
   }
   procNeeded->level = level;
-  // copy
-  // struct proc temp;
-  // copy_proc(procNeeded, &temp);
-  // for(p = procNeeded+1; p < &ptable.proc[NPROC]; p++){
-  //   if(p->state == UNUSED){
-  //     copy_proc(&temp, p);
-  //     break;
-  //   }
-  //   else{
-  //     copy_proc(p, p-1);
-  //   }
-  // }
-  // release(&ptable.lock);
   return 1;
 }
 
@@ -1077,4 +1062,63 @@ void htop(){
     }
   }
   release(&ptable.lock);
+}
+
+// LAB 4
+
+struct proc * find_proc(int pid){
+  struct proc* procNeeded = NULL;
+  struct proc *p;
+  // acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if (p->pid == pid){
+      procNeeded = p;
+      break;
+    }
+  }
+  return procNeeded;
+}
+
+int semaphore_aquire(int sid){
+  argint(0, &sid);
+  system_semaphores[sid].value--;
+  int value = system_semaphores[sid].value;
+  int num_of_procs = system_semaphores[sid].num_of_procs;
+  if (value < 0){
+    system_semaphores[sid].list[num_of_procs] =  myproc();
+    system_semaphores[sid].list[num_of_procs]->state = SLEEPING;
+    system_semaphores[sid].num_of_procs++;
+  }
+  return 0;
+}
+
+int semaphore_release(int sid){
+  argint(0, &sid);
+  system_semaphores[sid].value++;
+  int num_of_procs = system_semaphores[sid].num_of_procs;
+  int value = system_semaphores[sid].value;
+  if (value <= 0){
+    //TODO: check if ridim
+    system_semaphores[sid].list[0]->state = RUNNABLE;
+    for (int i = 1 ; i < num_of_procs ; i++){
+      system_semaphores[sid].list[i-1] = system_semaphores[sid].list[i]; 
+    }
+    system_semaphores[sid].num_of_procs--;
+  }
+  return 0;
+}
+
+/* m: init proc number
+   v: maximum number of procs in critical section */
+int semaphore_initialize(int sid, int v, int m){
+  argint(0, &sid);
+  argint(1, &v);
+  argint(2, &m);
+  if (sid < 0 || sid > 4 || v < 0 || m < 0){
+    return -1;
+  }
+  system_semaphores[sid].value = v;
+  system_semaphores[sid].m = m;
+  system_semaphores[sid].num_of_procs = 0;
+  return 0;
 }

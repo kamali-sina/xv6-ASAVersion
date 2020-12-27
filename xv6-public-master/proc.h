@@ -17,6 +17,13 @@ typedef struct {
   int valid;
 } proc_trace;
 
+typedef struct {
+  int value;
+  int m;
+  int num_of_procs;
+  struct proc* list[20];
+} semaphore;
+
 extern int trace_state;
 extern proc_trace tracer[100];
 

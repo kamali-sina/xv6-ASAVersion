@@ -29,3 +29,6 @@
 #define SYS_change_ratios_pl 28
 #define SYS_change_ratios_sl 29
 #define SYS_htop 30
+#define SYS_semaphore_initialize 31
+#define SYS_semaphore_aquire 32
+#define SYS_semaphore_release 33

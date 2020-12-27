@@ -131,6 +131,9 @@ int             set_tickets(int, int);
 int             change_ratios_pl(int, int, int, int);
 int             change_ratios_sl(int, int, int, int);
 void            htop(void);
+int             semaphore_initialize(int, int, int);
+int             semaphore_aquire(int);
+int             semaphore_release(int);
 
 
 // swtch.S

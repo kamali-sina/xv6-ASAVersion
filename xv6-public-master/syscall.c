@@ -113,6 +113,11 @@ extern int sys_set_tickets(void);
 extern int sys_change_ratios_pl(void);
 extern int sys_change_ratios_sl(void);
 extern int sys_htop(void);
+//Lab4
+extern int sys_semaphore_aquire(void);
+extern int sys_semaphore_release(void);
+extern int sys_semaphore_initialize(void);
+
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -145,6 +150,9 @@ static int (*syscalls[])(void) = {
 [SYS_change_ratios_pl] sys_change_ratios_pl,
 [SYS_change_ratios_sl] sys_change_ratios_sl,
 [SYS_htop] sys_htop,
+[SYS_semaphore_initialize] sys_semaphore_initialize,
+[SYS_semaphore_aquire] sys_semaphore_aquire,
+[SYS_semaphore_release] sys_semaphore_release,
 };
 
 int write_to_trace(int i, struct proc *proc){
