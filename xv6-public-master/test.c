@@ -1,13 +1,9 @@
 #include "usr_lock.h"
 
 int main(){
-    // struct condvar* condition = (struct condvar*)malloc(sizeof(struct condvar));
-    // cv_init(condition);
-    // init_lock(condition->lock);
-    // struct spinlock *dodol = (struct spinlock*)malloc(sizeof(struct spinlock));
-    // init_lock(dodol);
-    // lock(dodol);
-    // semaphore_initialize(0,0,0);
+    struct condvar* condition = (struct condvar*)malloc(sizeof(struct condvar));
+    cv_init(condition);
+    init_lock(&condition->lock);
     int pid = fork();
     if(pid < 0){
         printf(1, "Error forking first child.\n");
@@ -15,9 +11,9 @@ int main(){
     else{
         if(pid == 0){
             printf(1, "Child 1 executing.\n");
-            // semaphore_release(0);
-            // cv_signal(condition);
-            // unlock(dodol);
+            lock(&condition->lock);
+            cv_signal(condition);
+            unlock(&condition->lock);
         }
         else{
             pid = fork();
@@ -26,10 +22,11 @@ int main(){
             }
             else{
                 if(pid == 0){
-                    // cv_wait(condition);
-                    // lock(dodol);
-                    // semaphore_aquire(0);
+                    lock(&condition->lock);
+                    cv_wait(condition);
+                    unlock(&condition->lock);
                     printf(1, "Child 2 executing.\n");
+                    
                 }
                 else{
                     int i;

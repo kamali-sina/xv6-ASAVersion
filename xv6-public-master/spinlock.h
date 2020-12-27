@@ -12,6 +12,7 @@ struct spinlock {
 // Mutual exclusion lock.
 struct condvar{
   int first_free;
-  struct spinlock *lock;
+  struct spinlock lock;
   struct proc* list[20];
+  // int locks[20];
 };

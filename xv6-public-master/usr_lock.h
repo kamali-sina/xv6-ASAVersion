@@ -10,7 +10,6 @@ int lock(struct spinlock* loc){
 }
 
 int init_lock(struct spinlock* loc){
-    loc = (struct spinlock*)malloc(sizeof(struct spinlock)); 
     loc->locked = 0;
     return 0;
 }
