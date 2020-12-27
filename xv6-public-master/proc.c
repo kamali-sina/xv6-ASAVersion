@@ -605,30 +605,62 @@ int semaphore_initialize(int sid, int v, int m){
 //condvar
 
 int cv_init(struct condvar* condition){
-
+  int i;
+  argint(0,&i);
+  condition = (struct condvar *) i;
+  //argptr(0, &condition, sizeof(struct condvar));
+  condition->lock = 0;
+  condition->first_free = 0;
   return 0;
 }
 
 int cv_wait(struct condvar* condition)
 {
-
+  cprintf("in wait beginning\n");
+  int i;
+  argint(0,&i);
+  condition = (struct condvar *) i;
+  // argptr(0, &condition, sizeof(struct condvar));
+  condition->list[condition->first_free] = myproc();
+  acquire(&ptable.lock);
+  condition->list[condition->first_free]->state = SLEEPING;
+  sched();
+  release(&ptable.lock);
+  condition->first_free++;
   return 0;
 }
 
 int cv_signal(struct condvar* condition)
 {
-
+  int i;
+  argint(0,&i);
+  condition = (struct condvar *) i;
+  // argptr(0, &condition, sizeof(struct condvar));
+  acquire(&ptable.lock);
+  condition->list[0]->state = RUNNABLE;
+  release(&ptable.lock);
+  for (int i = 1 ; i < condition->first_free; i++){
+    condition->list[i-1] = condition->list[i]; 
+  }
+  condition->first_free--;
+  cprintf("in signal\n");
   return 0;
 }
 
 int amu_wait(struct condvar* condition)
 {
-
+  int i;
+  argint(0,&i);
+  condition = (struct condvar *) i;
+  // argptr(0, &condition, sizeof(struct condvar));
   return 0;
 }
 
 int amu_signal(struct condvar* condition)
 {
-
+  int i;
+  argint(0,&i);
+  condition = (struct condvar *) i;
+  // argptr(0, &condition, sizeof(struct condvar));
   return 0;
 }
