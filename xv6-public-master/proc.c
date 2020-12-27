@@ -9,7 +9,8 @@
 #define NULL 0
 semaphore system_semaphores[5];
 struct spinlock* mlock;
-struct condvar hcondition;
+struct condvar hcondition[20];
+int last_used = 0;
 
 struct {
   struct spinlock lock;
@@ -608,20 +609,22 @@ int semaphore_initialize(int sid, int v, int m){
 int sleep1(struct proc* p, struct condvar* condition){
   acquire(&ptable.lock);
   p->state = SLEEPING;
-  hcondition.first_free++;
-  // condition->first_free++;
+  // hcondition.first_free++;
+  condition->first_free++;
   sched();
   release(&ptable.lock);
   return 0;
 }
 
-int cv_init(struct condvar* condition){
+struct condvar* cv_init(void){
   int i;
   argint(0,&i);
-  condition = (struct condvar *) i;
+  // condition = (struct condvar *) i;
   // condition->first_free = 0;
-  hcondition.first_free = 0;
-  return 0;
+  hcondition[last_used].writer_inside = 0;
+  last_used++;
+  return &hcondition[last_used-1];
+  // hcondition.first_free = 0;
 }
 
 int cv_wait(struct condvar* condition)
@@ -629,8 +632,8 @@ int cv_wait(struct condvar* condition)
   int i;
   argint(0,&i);
   condition = (struct condvar *) i;
-  // condition->list[condition->first_free] = myproc();
-  hcondition.list[hcondition.first_free] = myproc();
+  condition->list[condition->first_free] = myproc();
+  // hcondition.list[hcondition.first_free] = myproc();
   sleep1(myproc(), condition);
   return 0;
 }
@@ -640,28 +643,28 @@ int cv_signal(struct condvar* condition)
   int i;
   argint(0,&i);
   condition = (struct condvar *) i;
-  // while (condition->first_free == 0){
-  //   myproc()->state = RUNNING;
-  // }
-  // acquire(&ptable.lock);
-  // condition->list[0]->state = RUNNABLE;
-  // release(&ptable.lock);
-  // wakeup(condition->list[0]);
-  while (hcondition.first_free == 0){
+  while (condition->first_free == 0){
     myproc()->state = RUNNING;
   }
   acquire(&ptable.lock);
-  hcondition.list[0]->state = RUNNABLE;
+  condition->list[0]->state = RUNNABLE;
   release(&ptable.lock);
-  wakeup(hcondition.list[0]);
-  for (int i = 1 ; i < hcondition.first_free; i++){
-    hcondition.list[i-1] = hcondition.list[i]; 
-  }
-  hcondition.first_free--;
-  // for (int i = 1 ; i < condition->first_free; i++){
-  //   condition->list[i-1] = condition->list[i]; 
+  wakeup(condition->list[0]);
+  // while (hcondition.first_free == 0){
+  //   myproc()->state = RUNNING;
   // }
-  // condition->first_free--;
+  // acquire(&ptable.lock);
+  // hcondition.list[0]->state = RUNNABLE;
+  // release(&ptable.lock);
+  // wakeup(hcondition.list[0]);
+  // for (int i = 1 ; i < hcondition.first_free; i++){
+  //   hcondition.list[i-1] = hcondition.list[i]; 
+  // }
+  // hcondition.first_free--;
+  for (int i = 1 ; i < condition->first_free; i++){
+    condition->list[i-1] = condition->list[i]; 
+  }
+  condition->first_free--;
   return 0;
 }
 
@@ -670,8 +673,10 @@ int amu_wait(struct condvar* condition)
   int i;
   argint(0,&i);
   condition = (struct condvar *) i;
-  hcondition.list[hcondition.first_free] = myproc();
+  condition->list[condition->first_free] = myproc();
+  // hcondition.list[hcondition.first_free] = myproc();
   sleep1(myproc(), condition);
+  return 0;
   return 0;
 }
 
@@ -680,16 +685,40 @@ int amu_signal(struct condvar* condition)
   int i;
   argint(0,&i);
   condition = (struct condvar *) i;
-  while (hcondition.first_free == 0){
+  while (condition->first_free == 0){
     myproc()->state = RUNNING;
   }
   acquire(&ptable.lock);
-  hcondition.list[0]->state = RUNNABLE;
+  condition->list[0]->state = RUNNABLE;
   release(&ptable.lock);
-  wakeup(hcondition.list[0]);
-  for (int i = 1 ; i < hcondition.first_free; i++){
-    hcondition.list[i-1] = hcondition.list[i]; 
+  wakeup(condition->list[0]);
+  for (int i = 1 ; i < condition->first_free; i++){
+    condition->list[i-1] = condition->list[i]; 
   }
-  hcondition.first_free--;
+  condition->first_free--;
   return 0;
+  return 0;
+}
+
+int amu_inc(struct condvar* condition){
+  int i;
+  argint(0,&i);
+  condition = (struct condvar *) i;
+  condition->writer_inside++;
+  return 0;
+}
+
+int amu_dec(struct condvar* condition){
+  int i;
+  argint(0,&i);
+  condition = (struct condvar *) i;
+  condition->writer_inside--;
+  return 0;
+}
+
+int amu_get(struct condvar* condition){
+  int i;
+  argint(0,&i);
+  condition = (struct condvar *) i;
+  return condition->writer_inside;
 }

@@ -2,17 +2,17 @@
 #include "user.h"
 
 int main(){
-    struct spinlock lk;
-    init_lock(&lk);
-    lock(&lk);
+    struct condvar* condition = (struct condvar*)malloc(sizeof(struct condvar));
+    condition = cv_init();
     int pid = fork();
     if(pid < 0){
         printf(1, "Error forking first child.\n");
     }
     else{
         if(pid == 0){
+            
             printf(1, "Child 1 executing.\n");
-            unlock(&lk);
+            cv_signal(condition);
         }
         else{
             pid = fork();
@@ -21,6 +21,7 @@ int main(){
             }
             else{
                 if(pid == 0){
+                    cv_wait(condition);
                     printf(1, "Child 2 executing.\n");
                     
                 }

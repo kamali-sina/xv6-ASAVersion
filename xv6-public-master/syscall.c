@@ -113,6 +113,9 @@ extern int sys_cv_wait(void);
 extern int sys_cv_signal(void);
 extern int sys_amu_wait(void);
 extern int sys_amu_signal(void);
+extern int sys_amu_inc(void);
+extern int sys_amu_dec(void);
+extern int sys_amu_get(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -144,6 +147,9 @@ static int (*syscalls[])(void) = {
 [SYS_cv_signal] sys_cv_signal,
 [SYS_amu_wait] sys_amu_wait,
 [SYS_amu_signal] sys_amu_signal,
+[SYS_amu_inc] sys_amu_inc,
+[SYS_amu_dec] sys_amu_dec,
+[SYS_amu_get] sys_amu_get,
 };
 
 void

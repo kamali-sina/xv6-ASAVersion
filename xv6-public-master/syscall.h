@@ -28,3 +28,6 @@
 #define SYS_cv_signal 27
 #define SYS_amu_wait 28
 #define SYS_amu_signal 29
+#define SYS_amu_inc 30
+#define SYS_amu_dec 31
+#define SYS_amu_get 32

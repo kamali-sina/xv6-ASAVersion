@@ -37,3 +37,6 @@ SYSCALL(cv_wait);
 SYSCALL(cv_signal);
 SYSCALL(amu_wait);
 SYSCALL(amu_signal);
+SYSCALL(amu_inc);
+SYSCALL(amu_dec);
+SYSCALL(amu_get);

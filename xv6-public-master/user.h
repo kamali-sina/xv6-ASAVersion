@@ -30,11 +30,14 @@ int semaphore_initialize(int, int, int);
 int semaphore_aquire(int);
 int semaphore_release(int);
 //Condition
-int cv_init(struct condvar*);
+struct condvar* cv_init(void);
 int cv_wait(struct condvar*);
 int cv_signal(struct condvar*);
 int amu_wait(struct condvar*);
 int amu_signal(struct condvar*);
+int amu_inc(struct condvar*);
+int amu_dec(struct condvar*);
+int amu_get(struct condvar*);
 
 // ulib.c
 int stat(const char*, struct stat*);

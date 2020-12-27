@@ -15,4 +15,5 @@ struct condvar{
   struct spinlock lock;
   struct proc* list[20];
   // int locks[20];
+  int writer_inside;
 };

@@ -111,9 +111,8 @@ sys_semaphore_release(int sid)
 
 //condtion
 
-int sys_cv_init(struct condvar* condition){
-  cv_init(condition);
-  return 0;
+struct condvar* sys_cv_init(){
+  return cv_init();
 }
 
 int sys_cv_wait(struct condvar* condition)
@@ -138,4 +137,16 @@ int sys_amu_signal(struct condvar* condition)
 {
   amu_signal(condition);
   return 0;
+}
+
+int sys_amu_inc(struct condvar* condition){
+  return amu_inc(condition);
+}
+
+int sys_amu_dec(struct condvar* condition){
+  return amu_dec(condition);
+}
+
+int sys_amu_get(struct condvar* condition){
+  return amu_get(condition);
 }
