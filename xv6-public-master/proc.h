@@ -20,14 +20,6 @@ typedef struct {
   struct proc* list[20];
 } semaphore;
 
-// Mutual exclusion lock.
-typedef struct {
-  uint locked;       // Is the lock held?
-
-  // For debugging:
-  char *name;        // Name of lock.
-}slock;
-
 
 //PAGEBREAK: 17
 // Saved registers for kernel context switches.

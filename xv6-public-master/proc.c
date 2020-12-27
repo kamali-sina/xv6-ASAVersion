@@ -549,6 +549,7 @@ struct proc * find_proc(int pid){
   return procNeeded;
 }
 
+//semaphore
 int semaphore_aquire(int sid){
   argint(0, &sid);
   system_semaphores[sid].value--;
@@ -599,4 +600,35 @@ int semaphore_initialize(int sid, int v, int m){
   system_semaphores[sid].m = m;
   system_semaphores[sid].num_of_procs = 0;
   return 1;
+}
+
+//condvar
+
+int cv_init(struct condvar* condition){
+
+  return 0;
+}
+
+int cv_wait(struct condvar* condition)
+{
+
+  return 0;
+}
+
+int cv_signal(struct condvar* condition)
+{
+
+  return 0;
+}
+
+int amu_wait(struct condvar* condition)
+{
+
+  return 0;
+}
+
+int amu_signal(struct condvar* condition)
+{
+
+  return 0;
 }

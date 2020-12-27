@@ -1,5 +1,4 @@
-#include "types.h"
-#include "user.h"
+#include "usr_lock.h"
 
 int main(){
     int pid = fork();

@@ -32,3 +32,8 @@ SYSCALL(uptime)
 SYSCALL(semaphore_initialize)
 SYSCALL(semaphore_aquire)
 SYSCALL(semaphore_release)
+SYSCALL(cv_init);
+SYSCALL(cv_wait);
+SYSCALL(cv_signal);
+SYSCALL(amu_wait);
+SYSCALL(amu_signal);

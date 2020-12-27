@@ -9,6 +9,7 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
+struct condvar;
 
 // bio.c
 void            binit(void);
@@ -160,6 +161,11 @@ void            syscall(void);
 int             semaphore_initialize(int, int, int);
 int             semaphore_aquire(int);
 int             semaphore_release(int);
+int             cv_init(struct condvar*);
+int             cv_wait(struct condvar*);
+int             cv_signal(struct condvar*);
+int             amu_wait(struct condvar*);
+int             amu_signal(struct condvar*);
 
 // timer.c
 void            timerinit(void);

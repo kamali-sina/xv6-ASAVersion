@@ -23,3 +23,8 @@
 #define SYS_semaphore_initialize 22
 #define SYS_semaphore_aquire 23
 #define SYS_semaphore_release 24
+#define SYS_cv_init 25
+#define SYS_cv_wait 26
+#define SYS_cv_signal 27
+#define SYS_amu_wait 28
+#define SYS_amu_signal 29

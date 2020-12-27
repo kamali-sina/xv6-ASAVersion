@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "spinlock.h"
 
 int
 sys_fork(void)
@@ -106,4 +107,35 @@ int
 sys_semaphore_release(int sid)
 {
   return semaphore_release(sid);
+}
+
+//condtion
+
+int sys_cv_init(struct condvar* condition){
+  cv_init(condition);
+  return 0;
+}
+
+int sys_cv_wait(struct condvar* condition)
+{
+  cv_wait(condition);
+  return 0;
+}
+
+int sys_cv_signal(struct condvar* condition)
+{
+  cv_signal(condition);
+  return 0;
+}
+
+int sys_amu_wait(struct condvar* condition)
+{
+  amu_wait(condition);
+  return 0;
+}
+
+int sys_amu_signal(struct condvar* condition)
+{
+  amu_signal(condition);
+  return 0;
 }

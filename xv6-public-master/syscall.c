@@ -107,6 +107,12 @@ extern int sys_uptime(void);
 extern int sys_semaphore_aquire(void);
 extern int sys_semaphore_release(void);
 extern int sys_semaphore_initialize(void);
+//condition
+extern int sys_cv_init(void);
+extern int sys_cv_wait(void);
+extern int sys_cv_signal(void);
+extern int sys_amu_wait(void);
+extern int sys_amu_signal(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -133,6 +139,11 @@ static int (*syscalls[])(void) = {
 [SYS_semaphore_initialize] sys_semaphore_initialize,
 [SYS_semaphore_aquire] sys_semaphore_aquire,
 [SYS_semaphore_release] sys_semaphore_release,
+[SYS_cv_init] sys_cv_init,
+[SYS_cv_wait] sys_cv_wait,
+[SYS_cv_signal] sys_cv_signal,
+[SYS_amu_wait] sys_amu_wait,
+[SYS_amu_signal] sys_amu_signal,
 };
 
 void

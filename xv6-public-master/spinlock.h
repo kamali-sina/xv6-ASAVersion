@@ -9,3 +9,8 @@ struct spinlock {
                      // that locked the lock.
 };
 
+// Mutual exclusion lock.
+struct condvar{
+  struct spinlock *lock;
+  struct proc* list[20];
+};
