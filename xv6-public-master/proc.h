@@ -60,15 +60,16 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
 
-  int tickets;                 // number of tickets for lottory, priority of process is 1/ticket number
-  int arrival_time;            // time wich process has arrived
-  float executed_cycle;        // time wich process was running
-  int priority_ratio;
-  int arrival_time_ratio;
-  int executed_cycle_ratio;
-  int level;
-  int waited;
-  //TODO: waited shall be initiated zero when process is created
+  int queue_priority;          // 1 for Round Robin, 2 for Lottery Tickets, 3 for BJF
+  int lottery_tickets;         // Set Number of tickets for Lottery Tickets Algorithm
+  int arrival_time;            // Time to get in to Queue
+  int exec_cycles;               // Executed Cycle Number
+  float priority;                // 1 / (Lottery Tickets Number)
+  int arrival_time_ratio;      // Ratio for BJF Algorithm
+  int exec_cycles_ratio;         // Ratio for BJF Algorithm
+  int priority_ratio;          // Ratio for BJF Algorithm
+  int rank;                    // Rank in BJF Algorithm
+  int cycles_waited;           // Cycles waited in Scheduler Queue
 };
 
 // Process memory is laid out contiguously, low addresses first:

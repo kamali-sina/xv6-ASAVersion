@@ -9,11 +9,7 @@ main(int argc, char *argv[])
 		printf(2, "number of argumants is exactly 4 argumants\n");
 		exit();
 	}
-	int result = change_ratios_pl(atoi(argv[1]),atoi(argv[2]),atoi(argv[3]),atoi(argv[4]));
-    if (result == 0){
-        printf(2,"did not find pid, terminating!\n");
-        exit();
-    }
+	change_ratios_pl(atoi(argv[1]),atoi(argv[2]),atoi(argv[3]),atoi(argv[4]));
 	printf(2,"done\n");
     exit();
 }

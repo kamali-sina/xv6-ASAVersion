@@ -99,6 +99,8 @@ exec(char *path, char **argv)
   curproc->sz = sz;
   curproc->tf->eip = elf.entry;  // main
   curproc->tf->esp = sp;
+  curproc->queue_priority = 1; //executable has high priority
+  curproc->lottery_tickets = 10000; //big tiks -> big luck
   switchuvm(curproc);
   freevm(oldpgdir);
   return 0;

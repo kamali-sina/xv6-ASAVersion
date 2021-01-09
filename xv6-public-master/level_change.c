@@ -9,11 +9,7 @@ main(int argc, char *argv[])
 		printf(2, "number of argumants is exactly 2 argumants\n");
 		exit();
 	}
-	int result = level_change(atoi(argv[1]),atoi(argv[2]));
-    if (result == 0){
-        printf(2,"did not find pid, terminating!\n");
-        exit();
-    }
+	level_change(atoi(argv[1]),atoi(argv[2]));
 	printf(2,"done\n");
     exit();
 }

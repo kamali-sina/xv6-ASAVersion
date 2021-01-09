@@ -24,10 +24,10 @@ main(void)
     printf(1, "1- Amir Mahdi Mohamadian\n");
     printf(1, "2- Sina Kamali\n");
     printf(1, "3- Alireza Ebrahimi\n");
-    int test = fork();
-    if (test == 0){
-      setup_trace(1);
-    }
+    // int test = fork();
+    // if (test == 0){
+    //   setup_trace(1);
+    // }
     pid = fork();
     if(pid < 0){
       printf(1, "init: fork failed\n");
