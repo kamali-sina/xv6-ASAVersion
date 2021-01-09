@@ -191,5 +191,5 @@ void            clearpteu(pde_t *pgdir, char *uva);
 
 // Lab 5
 
-int get_free_pages_count();
+int get_free_pages_count(void);
 void* mmap(void*, int, int, int, int, int);

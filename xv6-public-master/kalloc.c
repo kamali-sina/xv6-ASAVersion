@@ -13,15 +13,15 @@ void freerange(void *vstart, void *vend);
 extern char end[]; // first address after kernel loaded from ELF file
                    // defined by the kernel linker script in kernel.ld
 
-struct run {
-  struct run *next;
-};
-
 struct {
   struct spinlock lock;
   int use_lock;
   struct run *freelist;
 } kmem;
+
+struct run *get_freelist(){
+  return kmem.freelist;
+}
 
 // Initialization happens in two phases.
 // 1. main() calls kinit1() while still using entrypgdir to place just

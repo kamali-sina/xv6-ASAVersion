@@ -7,6 +7,8 @@
 #include "proc.h"
 #include "spinlock.h"
 
+#define NULL 0
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -535,10 +537,19 @@ procdump(void)
 
 // Lab 5
 
-int get_free_pages_count(){
-
+int get_free_pages_count(void){
+  struct run* fuck = get_freelist();
+  int count = 0;
+  while (fuck){
+    // cprintf("fuck is: %d\n", fuck);
+    count++;
+    fuck = fuck->next;
+  }
+  return count;
 }
 
 void* mmap(void* addr, int lenght, int prot, int flags, int fd, int offset){
   //TODO: use argint 
+  kalloc();
+  return 0;
 }
