@@ -188,3 +188,8 @@ void            clearpteu(pde_t *pgdir, char *uva);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
+
+// Lab 5
+
+int get_free_pages_count();
+void* mmap(void*, int, int, int, int, int);

@@ -532,3 +532,13 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+// Lab 5
+
+int get_free_pages_count(){
+
+}
+
+void* mmap(void* addr, int lenght, int prot, int flags, int fd, int offset){
+  //TODO: use argint 
+}

@@ -89,3 +89,13 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+// Lab5
+
+int sys_get_free_pages_count(){
+
+}
+
+void* sys_mmap(void* addr, int lenght, int prot, int flags, int fd, int offset){
+  
+}
