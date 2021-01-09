@@ -51,6 +51,15 @@ fdalloc(struct file *f)
   }
   return -1;
 }
+void _inc_ref(int fd){
+  struct proc *curproc = myproc();
+  if(curproc->ofile[fd] == 0){
+    panic("fuck");
+  }
+  else{
+    curproc->ofile[fd]++;
+  }
+}
 
 int
 sys_dup(void)

@@ -22,6 +22,17 @@ fileinit(void)
   initlock(&ftable.lock, "ftable");
 }
 
+void inc_ref(int fd){
+  acquire(&ftable.lock);
+
+  ftable.file[fd].ref = ftable.file[fd].ref + 1;
+
+  release(&ftable.lock);
+}
+void print_ref(int fd){
+  cprintf("%d \n", ftable.file[fd].ref);
+}
+
 // Allocate a file structure.
 struct file*
 filealloc(void)

@@ -93,9 +93,12 @@ sys_uptime(void)
 // Lab5
 
 int sys_get_free_pages_count(void){
-  return get_free_pages_count();
+  int temp = get_free_pages_count();
+  return temp;
 }
 
 void* sys_mmap(void* addr, int lenght, int prot, int flags, int fd, int offset){
-  return mmap(addr, lenght, prot, flags, fd, offset);
+  mmap(addr, lenght, prot, flags, fd, offset);
+  return 0;
 }
+  

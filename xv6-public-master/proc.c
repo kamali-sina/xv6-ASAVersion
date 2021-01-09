@@ -113,6 +113,11 @@ found:
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
+  for(int i = 0; i < NOFILE; i++){
+    p->lenght[i] = NULL;
+    p->prot[i] = NULL;
+    p->offset[i] = NULL;
+  }
 
   return p;
 }
@@ -549,7 +554,25 @@ int get_free_pages_count(void){
 }
 
 void* mmap(void* addr, int lenght, int prot, int flags, int fd, int offset){
-  //TODO: use argint 
-  kalloc();
+  int i;
+  argint(0,&i);
+  addr = (void *) i;
+  argint(1, &lenght);
+  argint(2, &prot);
+  argint(3, &flags);
+  argint(4, &fd);
+  argint(5, &offset);
+
+  // make lenght multiple of page size
+  lenght = PGROUNDUP(lenght);
+  // struct proc * p = myproc();
+  // struct proc*
+  // inc_ref(fd);
+  filedup(myproc()->ofile[fd]);
+  myproc()->lenght[fd] = lenght;
+  myproc()->prot[fd] = prot;
+  myproc()->offset[fd] = offset;
+
+  // kalloc();
   return 0;
 }
