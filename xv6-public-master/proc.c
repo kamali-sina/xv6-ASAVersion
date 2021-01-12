@@ -244,6 +244,7 @@ exit(void)
   // Close all open files.
   for(fd = 0; fd < NOFILE; fd++){
     if(curproc->ofile[fd]){
+      //TODO: do this plz, make cur proc 
       fileclose(curproc->ofile[fd]);
       curproc->ofile[fd] = 0;
     }

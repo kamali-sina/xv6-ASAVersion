@@ -14,6 +14,10 @@ extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
 
+void pg_trap_handler(){
+  //TODO
+}
+
 void
 tvinit(void)
 {
@@ -77,7 +81,10 @@ trap(struct trapframe *tf)
             cpuid(), tf->cs, tf->eip);
     lapiceoi();
     break;
-
+  //Lab5
+  case T_PGFLT:
+    pg_trap_handler();
+    break;
   //PAGEBREAK: 13
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){
