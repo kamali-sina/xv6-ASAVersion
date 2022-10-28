@@ -1,9 +1,7 @@
 
-The Lab project of OS course of University of Tehran at the fall of 2020. This project is written, maintained and edited by Sina Kamali, Amir Mahdi Mohamadian and Alireza Ebrahimi. Not all of the codes in this project belongs to us and the main code is recieved from the MIT-PDOS account.
-
-In three steps we will develope and add new functions to the raw xv6 os. In the first step we added some primitive functualities like ctrl+(c/v/b/x).
-
 # xv6-ASAVersion
+
+The Lab project of OS course of University of Tehran at the fall of 2020. This project is written, maintained and edited by Sina Kamali, Amir Mahdi Mohamadian and Alireza Ebrahimi. Not all of the codes in this project belongs to us and the main code is recieved from the MIT-PDOS account.
 
 xv6-ASAVersion is an operating system cloned from [xv6](https://github.com/mit-pdos/xv6-public) with some added features. Xv6 is a modern reimplementation of Sixth Edition Unix in ANSI C for multiprocessor x86 and RISC-V systems, developed in the summer of 2006 for MIT's operating systems course. xv6-ASAVersion is the result of lab projects of operating systems course at the University of Tehran.
 
