@@ -140,3 +140,7 @@ make TOOLPREFIX=i386-elf- qemu-nox
 ```
 
 To exit, press `ctrl + a` and then `x`.
+
+## Aditional Contributions
+
+The README.md file was contributed to the project by [Sina Negarandeh](https://github.com/sina-negarandeh)
